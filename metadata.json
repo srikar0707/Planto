@@ -1,0 +1,6 @@
+{
+  "name": "PlantO",
+  "description": "PlantO - Premium Nursery Gardens, Plants, Gardening Accessories & Landscaping Solutions",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #F9F8F3;
+    --text-primary: #1B3022;
+    --brand-green: #2D4F36;
+    --brand-dark: #122116;
+    --sage-green: #A3B18A;
+    --earth-brown: #8D5B4C;
+    --card-bg: #FFFFFF;
+    --card-accent: #F1EFE7;
+  }
+
+  /* Prevent blinking cursor on non-input clicks across browser engines */
+  *:not(input):not(textarea):not([contenteditable="true"]) {
+    caret-color: transparent;
+  }
+
+  input, textarea, [contenteditable="true"] {
+    caret-color: #2D4F36;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .font-devanagari {
+    font-family: 'Noto Sans Devanagari', 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .font-telugu {
+    font-family: 'Noto Sans Telugu', 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(6deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes float-reverse {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(18px) rotate(-8deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes leaf-sway {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(8deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float 9s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 7.5s ease-in-out infinite;
+}
+
+.animate-leaf-sway {
+  animation: leaf-sway 4s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1EFE7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A3B18A;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2D4F36;
+}
