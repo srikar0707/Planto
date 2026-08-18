@@ -171,16 +171,19 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   <div className="flex items-center border border-[#1B3022]/20 rounded-full bg-white overflow-hidden">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="px-3 py-1.5 hover:bg-[#1B3022]/10 text-[#1B3022] font-bold text-sm"
+                      disabled={quantity <= 1}
+                      className="px-3 py-1.5 hover:bg-[#1B3022]/10 disabled:opacity-30 disabled:cursor-not-allowed text-[#1B3022] font-bold text-sm"
                     >
                       -
                     </button>
-                    <span className="px-4 py-1.5 font-bold text-xs text-[#1B3022]">
+                    <span className="px-4 py-1.5 font-bold text-xs text-[#1B3022] min-w-[32px] text-center">
                       {quantity}
                     </span>
                     <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="px-3 py-1.5 hover:bg-[#1B3022]/10 text-[#1B3022] font-bold text-sm"
+                      onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                      disabled={quantity >= 99}
+                      className="px-3 py-1.5 hover:bg-[#1B3022]/10 disabled:opacity-30 disabled:cursor-not-allowed text-[#1B3022] font-bold text-sm"
+                      title={quantity >= 99 ? 'Maximum quantity is 99' : 'Increase quantity'}
                     >
                       +
                     </button>

@@ -106,17 +106,28 @@ export default function App() {
 
   // Cart operations
   const handleAddToCart = (product: Product, quantity = 1) => {
+    const validQty = Math.max(1, Math.min(99, quantity));
+    let finalAddedQty = validQty;
+
     setCartItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.product.id === product.id);
       if (existingIndex > -1) {
         const updated = [...prev];
-        updated[existingIndex].quantity += quantity;
+        const currentQty = updated[existingIndex].quantity;
+        const newQty = Math.min(99, currentQty + validQty);
+        finalAddedQty = newQty - currentQty;
+        updated[existingIndex] = { ...updated[existingIndex], quantity: newQty };
         return updated;
       } else {
-        return [...prev, { product, quantity }];
+        return [...prev, { product, quantity: validQty }];
       }
     });
-    triggerToast(`Added ${quantity}x "${product.name}" to cart! 🌿`);
+
+    if (finalAddedQty > 0) {
+      triggerToast(`Added ${finalAddedQty}x "${product.name}" to cart! 🌿`);
+    } else {
+      triggerToast(`Maximum quantity of 99 reached for "${product.name}".`);
+    }
   };
 
   const handleUpdateCartQuantity = (productId: string, newQuantity: number) => {
@@ -124,9 +135,10 @@ export default function App() {
       handleRemoveFromCart(productId);
       return;
     }
+    const clampedQty = Math.min(99, newQuantity);
     setCartItems((prev) =>
       prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity: newQuantity } : item
+        item.product.id === productId ? { ...item, quantity: clampedQty } : item
       )
     );
   };

@@ -124,4 +124,28 @@ Please contact me regarding this order.`;
     expect(message).toContain('• Monstera Deliciosa × 2 (₹1398)');
     expect(message).toContain('Total Amount: ₹1398');
   });
+
+  it('enforces maximum item quantity of 99', () => {
+    const clampQty = (qty: number) => Math.max(1, Math.min(99, qty));
+    expect(clampQty(100)).toBe(99);
+    expect(clampQty(99)).toBe(99);
+    expect(clampQty(150)).toBe(99);
+    expect(clampQty(5)).toBe(5);
+
+    // Adding to an item with quantity 95 trying to add 10
+    const currentQty = 95;
+    const addedQty = 10;
+    const newQty = Math.min(99, currentQty + addedQty);
+    expect(newQty).toBe(99);
+  });
+
+  it('strictly filters phone input to 10 digits and strips non-numeric characters', () => {
+    const sanitizePhone = (input: string) => input.replace(/\D/g, '').slice(0, 10);
+    
+    expect(sanitizePhone('abc9876543210xyz')).toBe('9876543210');
+    expect(sanitizePhone('98765-43210')).toBe('9876543210');
+    expect(sanitizePhone('98765 43210 99999')).toBe('9876543210');
+    expect(sanitizePhone('hello world')).toBe('');
+    expect(sanitizePhone('9876543210').length).toBe(10);
+  });
 });

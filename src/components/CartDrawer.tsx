@@ -41,15 +41,25 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
     if (cartItems.length === 0) return;
 
-    if (!customerName.trim() || !customerPhone.trim()) {
-      alert('Please provide your Name and Phone number to proceed with WhatsApp checkout.');
+    if (!customerName.trim()) {
+      alert('Please provide your Full Name to proceed with WhatsApp checkout.');
+      return;
+    }
+
+    const cleanPhone = customerPhone.replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      alert('Please enter a valid 10-digit mobile number (digits only, e.g. 9876543210).');
       return;
     }
 
     setIsSubmitting(true);
     let orderNumber: string;
     try {
-      orderNumber = await onCheckout({ customerName: customerName.trim(), phone: customerPhone.trim(), address: customerAddress.trim() || 'To be specified' });
+      orderNumber = await onCheckout({
+        customerName: customerName.trim(),
+        phone: `+91 ${cleanPhone}`,
+        address: customerAddress.trim() || 'To be specified',
+      });
     } catch (error) {
       console.error(error);
       alert('We could not save your order. Please try again before opening WhatsApp.');
@@ -70,7 +80,7 @@ I would like to place an order.
 Order ID: ${orderNumber}
 
 Customer Name: ${customerName.trim()}
-Phone Number: ${customerPhone.trim()}
+Phone Number: +91 ${cleanPhone}
 Delivery Address: ${customerAddress.trim() || 'To be specified'}
 
 Products:
@@ -117,7 +127,7 @@ Please contact me regarding this order.`;
 
             <button
               onClick={onClose}
-              className="p-2 text-[#1B3022] hover:bg-[#1B3022]/10 rounded-full transition-colors"
+              className="p-2 text-[#1B3022] hover:bg-[#1B3022]/10 rounded-full transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -136,7 +146,7 @@ Please contact me regarding this order.`;
                 </p>
                 <button
                   onClick={onClose}
-                  className="px-6 py-2.5 bg-[#2D4F36] text-white text-xs font-bold uppercase tracking-wider rounded-full hover:bg-[#1B3022] transition-colors"
+                  className="px-6 py-2.5 bg-[#2D4F36] text-white text-xs font-bold uppercase tracking-wider rounded-full hover:bg-[#1B3022] transition-colors cursor-pointer"
                 >
                   Explore Plants
                 </button>
@@ -164,22 +174,31 @@ Please contact me regarding this order.`;
                       ₹{item.product.price}
                     </span>
 
-                    {/* Quantity Controls */}
+                    {/* Quantity Controls (Max 99) */}
                     <div className="flex items-center space-x-2 mt-2">
                       <button
                         onClick={() =>
                           onUpdateQuantity(item.product.id, item.quantity - 1)
                         }
-                        className="w-6 h-6 rounded-full bg-[#F1EFE7] hover:bg-[#2D4F36] hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
+                        className="w-6 h-6 rounded-full bg-[#F1EFE7] hover:bg-[#2D4F36] hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                        title="Decrease quantity"
                       >
                         <Minus className="w-3 h-3" />
                       </button>
-                      <span className="text-xs font-bold px-1">{item.quantity}</span>
+                      <span className="text-xs font-bold px-1 min-w-[20px] text-center">
+                        {item.quantity}
+                      </span>
                       <button
                         onClick={() =>
-                          onUpdateQuantity(item.product.id, item.quantity + 1)
+                          onUpdateQuantity(item.product.id, Math.min(99, item.quantity + 1))
                         }
-                        className="w-6 h-6 rounded-full bg-[#F1EFE7] hover:bg-[#2D4F36] hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
+                        disabled={item.quantity >= 99}
+                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                          item.quantity >= 99
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                            : 'bg-[#F1EFE7] hover:bg-[#2D4F36] hover:text-white cursor-pointer'
+                        }`}
+                        title={item.quantity >= 99 ? 'Maximum quantity is 99' : 'Increase quantity'}
                       >
                         <Plus className="w-3 h-3" />
                       </button>
@@ -192,7 +211,7 @@ Please contact me regarding this order.`;
                     </span>
                     <button
                       onClick={() => onRemoveItem(item.product.id)}
-                      className="text-[#1B3022]/40 hover:text-rose-600 mt-2 p-1"
+                      className="text-[#1B3022]/40 hover:text-rose-600 mt-2 p-1 cursor-pointer"
                       title="Remove item"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -213,10 +232,13 @@ Please contact me regarding this order.`;
                 </span>
 
                 <div>
+                  <label className="block text-[11px] font-bold text-[#1B3022] mb-1">
+                    Full Name *
+                  </label>
                   <input
                     type="text"
                     required
-                    placeholder="Full Name *"
+                    placeholder="e.g. Ramesh Kumar"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     className="w-full bg-white px-3 py-2 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
@@ -224,20 +246,56 @@ Please contact me regarding this order.`;
                 </div>
 
                 <div>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="Mobile / WhatsApp Number *"
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full bg-white px-3 py-2 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
-                  />
+                  <label className="block text-[11px] font-bold text-[#1B3022] mb-1">
+                    Mobile / WhatsApp Number (10 Digits) *
+                  </label>
+                  <div className="relative flex items-center">
+                    <span className="absolute left-3 text-xs font-bold text-[#1B3022]/60 select-none">
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]{10}"
+                      maxLength={10}
+                      required
+                      placeholder="9876543210"
+                      value={customerPhone}
+                      onChange={(e) => {
+                        // Strict numeric filter - only allows digits and caps at 10 digits
+                        const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
+                        setCustomerPhone(digitsOnly);
+                      }}
+                      className={`w-full bg-white pl-12 pr-14 py-2 rounded-xl border text-xs text-[#1B3022] focus:outline-none transition-colors ${
+                        customerPhone.length > 0 && customerPhone.length < 10
+                          ? 'border-amber-400 focus:border-amber-500'
+                          : customerPhone.length === 10
+                          ? 'border-emerald-600 focus:border-emerald-700 bg-emerald-50/20'
+                          : 'border-[#1B3022]/15 focus:border-[#2D4F36]'
+                      }`}
+                    />
+                    <span
+                      className={`absolute right-3 text-[10px] font-bold ${
+                        customerPhone.length === 10 ? 'text-emerald-700' : 'text-[#1B3022]/50'
+                      }`}
+                    >
+                      {customerPhone.length}/10
+                    </span>
+                  </div>
+                  {customerPhone.length > 0 && customerPhone.length < 10 && (
+                    <span className="text-[10px] text-amber-700 mt-1 block">
+                      Enter {10 - customerPhone.length} more digit{10 - customerPhone.length > 1 ? 's' : ''} (10 digits required).
+                    </span>
+                  )}
                 </div>
 
                 <div>
+                  <label className="block text-[11px] font-bold text-[#1B3022] mb-1">
+                    Delivery Address / City
+                  </label>
                   <input
                     type="text"
-                    placeholder="Delivery Address / City"
+                    placeholder="e.g. Rajahmundry, Andhra Pradesh"
                     value={customerAddress}
                     onChange={(e) => setCustomerAddress(e.target.value)}
                     className="w-full bg-white px-3 py-2 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
