@@ -29,7 +29,8 @@ import {
   Sparkles,
   HelpCircle,
   Loader2,
-  Check
+  Check,
+  HeartHandshake
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -70,7 +71,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   // Active tab inside admin panel
   const [activeTab, setActiveTab] = useState<
-    'dashboard' | 'products' | 'categories' | 'landscaping' | 'whatsapp' | 'settings'
+    'dashboard' | 'products' | 'categories' | 'landscaping' | 'about' | 'whatsapp' | 'settings'
   >('dashboard');
 
   // Product Editing Modal State
@@ -87,6 +88,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Landscaping Service Editing Modal State
   const [editingService, setEditingService] = useState<Partial<LandscapingService> | null>(null);
   const [newFeatureInput, setNewFeatureInput] = useState('');
+
+  // About Us Key Point input state
+  const [newPointInput, setNewPointInput] = useState('');
 
   // Image Uploading Loading State
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -214,6 +218,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       alert('Landscaping & Gardening Works section saved successfully!');
     } catch (err: any) {
       alert(`Failed to save landscaping settings: ${err?.message || 'Check your admin permissions.'}`);
+    }
+  };
+
+  // About Us Save Handler
+  const handleSaveAboutUs = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await onUpdateSettings(settingsForm);
+      alert('About Us section updated and saved successfully!');
+    } catch (err: any) {
+      alert(`Failed to save About Us content: ${err?.message || 'Check your admin permissions.'}`);
     }
   };
 
@@ -485,6 +500,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               >
                 <Trees className="w-4 h-4 text-[#2D4F36] group-hover:text-white" />
                 <span>Landscaping & Works</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('about')}
+                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors cursor-pointer ${
+                  activeTab === 'about'
+                    ? 'bg-[#2D4F36] text-white shadow-sm'
+                    : 'text-[#1B3022] hover:bg-[#1B3022]/10'
+                }`}
+              >
+                <HeartHandshake className="w-4 h-4 text-[#2D4F36]" />
+                <span>About Us Section</span>
               </button>
 
               <button
@@ -1095,6 +1122,305 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
                   </div>
                 </div>
+              )}
+
+              {/* TAB: ABOUT US SECTION MANAGEMENT */}
+              {activeTab === 'about' && (
+                <form onSubmit={handleSaveAboutUs} className="space-y-8">
+                  {/* Top Header */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#1B3022]/10">
+                    <div>
+                      <div className="flex items-center space-x-2 text-[#2D4F36] mb-1">
+                        <HeartHandshake className="w-5 h-5" />
+                        <span className="text-xs font-bold uppercase tracking-widest">
+                          About Us & Heritage Content
+                        </span>
+                      </div>
+                      <h3 className="text-2xl font-serif font-bold text-[#1B3022]">
+                        About Us Section Management
+                      </h3>
+                      <p className="text-xs text-[#1B3022]/65 mt-0.5">
+                        Edit your nursery's mission statement, extended story, core values, and upload or replace the section photo.
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold uppercase tracking-wider rounded-full transition-colors flex items-center space-x-2 cursor-pointer shadow-md"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>Save About Us Content</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Left Column: Photo & Badge Management */}
+                    <div className="lg:col-span-5 space-y-6">
+                      <div className="bg-white p-6 rounded-3xl border border-[#1B3022]/10 shadow-sm space-y-4">
+                        <h4 className="text-sm font-serif font-bold text-[#2D4F36] pb-2 border-b border-[#1B3022]/10">
+                          About Us Section Photo
+                        </h4>
+
+                        {/* Image Preview */}
+                        {settingsForm.aboutUsImage ? (
+                          <div className="relative rounded-2xl overflow-hidden border border-[#1B3022]/15 bg-[#1B3022] aspect-[4/5] group">
+                            <img
+                              src={settingsForm.aboutUsImage}
+                              alt="About Us Preview"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-4 text-white">
+                              <label className="px-3 py-2 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold rounded-xl cursor-pointer transition-colors shadow">
+                                <span>Replace Photo</span>
+                                <input
+                                  type="file"
+                                  accept="image/png, image/jpeg, image/webp"
+                                  className="hidden"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const url = await handleUploadImageFile(file);
+                                      setSettingsForm({ ...settingsForm, aboutUsImage: url });
+                                    }
+                                  }}
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setSettingsForm({ ...settingsForm, aboutUsImage: '' })}
+                                className="px-3 py-2 bg-rose-600/90 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-8 border-2 border-dashed border-[#1B3022]/20 rounded-2xl bg-[#F9F8F3] text-center space-y-3 aspect-[4/5] flex flex-col items-center justify-center">
+                            <ImageIcon className="w-10 h-10 text-[#2D4F36]/50 mx-auto" />
+                            <p className="text-xs font-bold text-[#1B3022]">
+                              No custom photo uploaded yet
+                            </p>
+                            <p className="text-[11px] text-[#1B3022]/60 max-w-[200px]">
+                              Upload a portrait/nursery photo showcasing your green garden.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Upload Actions */}
+                        <div className="space-y-3 pt-2">
+                          <label className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold rounded-xl cursor-pointer transition-colors shadow-sm w-full">
+                            {isUploadingImage ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Uploading to Supabase...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4" />
+                                <span>Upload Photo (PNG/JPG/WebP)</span>
+                              </>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/png, image/jpeg, image/webp"
+                              className="hidden"
+                              disabled={isUploadingImage}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const url = await handleUploadImageFile(file);
+                                  setSettingsForm({ ...settingsForm, aboutUsImage: url });
+                                }
+                              }}
+                            />
+                          </label>
+
+                          <input
+                            type="url"
+                            placeholder="Or paste image web link (https://...)"
+                            value={settingsForm.aboutUsImage || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, aboutUsImage: e.target.value })
+                            }
+                            className="w-full bg-[#F9F8F3] px-3 py-2 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
+                          />
+                        </div>
+
+                        {/* Photo Established Badge */}
+                        <div className="pt-2 border-t border-[#1B3022]/10">
+                          <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                            Established Year / Photo Badge
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Established 2011"
+                            value={settingsForm.aboutUsEstablished || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, aboutUsEstablished: e.target.value })
+                            }
+                            className="w-full bg-[#F9F8F3] p-2.5 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Mission, Story & Points */}
+                    <div className="lg:col-span-7 space-y-6">
+                      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#1B3022]/10 shadow-sm space-y-5">
+                        <h4 className="text-sm font-serif font-bold text-[#2D4F36] pb-2 border-b border-[#1B3022]/10">
+                          Section Headings & Content
+                        </h4>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                              Section Tagline / Subtitle
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Our Mission & Heritage"
+                              value={settingsForm.aboutUsTagline || ''}
+                              onChange={(e) =>
+                                setSettingsForm({ ...settingsForm, aboutUsTagline: e.target.value })
+                              }
+                              className="w-full bg-[#F9F8F3] p-2.5 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                              Section Main Title
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. About PlantO Nursery"
+                              value={settingsForm.aboutUsTitle || ''}
+                              onChange={(e) =>
+                                setSettingsForm({ ...settingsForm, aboutUsTitle: e.target.value })
+                              }
+                              className="w-full bg-[#F9F8F3] p-2.5 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Mission Statement */}
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                            Primary Mission Statement *
+                          </label>
+                          <textarea
+                            rows={3}
+                            required
+                            placeholder="State your nursery's primary mission and botanical commitment..."
+                            value={settingsForm.aboutUsMission || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, aboutUsMission: e.target.value })
+                            }
+                            className="w-full bg-[#F9F8F3] p-3 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36] leading-relaxed"
+                          ></textarea>
+                        </div>
+
+                        {/* Extended Story / Paragraph */}
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                            Extended Nursery Story / Detailed Background
+                          </label>
+                          <textarea
+                            rows={4}
+                            placeholder="Share more about your nursery history, organic plant care philosophy, landscaping team, and greenhouse facilities..."
+                            value={settingsForm.aboutUsStory || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, aboutUsStory: e.target.value })
+                            }
+                            className="w-full bg-[#F9F8F3] p-3 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36] leading-relaxed"
+                          ></textarea>
+                        </div>
+
+                        {/* Key Highlights / Values Tags */}
+                        <div className="space-y-3 pt-2 border-t border-[#1B3022]/10">
+                          <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022]">
+                            Core Values & Highlights (Bullet Points)
+                          </label>
+
+                          <div className="space-y-2 bg-[#F1EFE7] p-4 rounded-2xl border border-[#1B3022]/15">
+                            <div className="flex flex-wrap gap-2">
+                              {(settingsForm.aboutUsPoints || []).map((point, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#1B3022]/10 rounded-full text-xs text-[#1B3022] shadow-sm"
+                                >
+                                  <Check className="w-3.5 h-3.5 text-[#2D4F36]" />
+                                  <span>{point}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = (settingsForm.aboutUsPoints || []).filter(
+                                        (_, i) => i !== idx
+                                      );
+                                      setSettingsForm({ ...settingsForm, aboutUsPoints: updated });
+                                    }}
+                                    className="text-rose-500 hover:text-rose-700 font-bold ml-1 cursor-pointer"
+                                  >
+                                    &times;
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+
+                            <div className="flex items-center gap-2 pt-2">
+                              <input
+                                type="text"
+                                placeholder="e.g. 100% Acclimatized & Pest-Free Plants"
+                                value={newPointInput}
+                                onChange={(e) => setNewPointInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (newPointInput.trim()) {
+                                      const current = settingsForm.aboutUsPoints || [];
+                                      setSettingsForm({
+                                        ...settingsForm,
+                                        aboutUsPoints: [...current, newPointInput.trim()],
+                                      });
+                                      setNewPointInput('');
+                                    }
+                                  }
+                                }}
+                                className="flex-1 p-2 bg-white border border-[#1B3022]/20 rounded-xl text-xs"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (newPointInput.trim()) {
+                                    const current = settingsForm.aboutUsPoints || [];
+                                    setSettingsForm({
+                                      ...settingsForm,
+                                      aboutUsPoints: [...current, newPointInput.trim()],
+                                    });
+                                    setNewPointInput('');
+                                  }
+                                }}
+                                className="px-4 py-2 bg-[#2D4F36] hover:bg-[#1B3022] text-white rounded-xl font-bold text-xs cursor-pointer shadow-sm"
+                              >
+                                + Add Highlight
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="pt-4">
+                          <button
+                            type="submit"
+                            className="w-full py-3.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold uppercase tracking-widest rounded-full transition-colors shadow-lg cursor-pointer flex items-center justify-center space-x-2"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>Save All About Us Content</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
               )}
 
               {/* TAB 5: WHATSAPP SETTINGS */}

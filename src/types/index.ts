@@ -55,6 +55,12 @@ export interface WebsiteSettings {
   sloganTelugu: string;
   heroTagline: string;
   aboutUsMission: string;
+  aboutUsTagline?: string;
+  aboutUsTitle?: string;
+  aboutUsStory?: string;
+  aboutUsImage?: string;
+  aboutUsEstablished?: string;
+  aboutUsPoints?: string[];
   contactPhone: string;
   contactEmail: string;
   contactAddress: string;

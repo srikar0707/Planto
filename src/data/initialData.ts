@@ -10,6 +10,17 @@ export const INITIAL_SETTINGS: WebsiteSettings = {
   sloganTelugu: "వృక్షో రక్షతి రక్షితః",
   heroTagline: "Bringing Nature Closer to Every Home.",
   aboutUsMission: "PlantO believes that every home deserves the beauty of nature. We provide healthy plants, premium gardening accessories, landscaping solutions, and expert guidance to help people create greener and healthier spaces.",
+  aboutUsTagline: "Our Mission & Heritage",
+  aboutUsTitle: "About PlantO Nursery",
+  aboutUsStory: "Rooted in a deep reverence for nature and sustainable horticulture, PlantO Nursery Gardens has grown into a premier destination for plant enthusiasts, homeowners, and landscape architects. We carefully acclimatize our flora to flourish in local environments while providing ethical botanical care.",
+  aboutUsImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=1000&q=80",
+  aboutUsEstablished: "Established 2011",
+  aboutUsPoints: [
+    "100% Acclimatized & Pest-Free Plants",
+    "Expert Horticultural Consultation & Care Support",
+    "Turnkey Residential & Commercial Landscaping",
+    "Eco-Friendly Pots, Organic Soil & Nutrients"
+  ],
   contactPhone: "+91 98765 43210",
   contactEmail: "care@planto.in",
   contactAddress: "Plant'O Nursery, Rajahmundry, Andhra Pradesh 533126",
