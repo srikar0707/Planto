@@ -147,15 +147,30 @@ ${message}`;
               </div>
             </div>
 
-            {/* Embedded Google Map Placeholder */}
-            <div className="bg-white rounded-3xl overflow-hidden border border-[#1B3022]/10 shadow-sm aspect-[16/9] relative">
-              <iframe
-                title="PlantO Nursery Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15228.452684940562!2d78.38260175000001!3d17.4542247!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9158f201b205%3A0x11bbe7be7792411b!2sHITEC%20City%2C%20Hyderabad%2C%20Telangana!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
-                className="w-full h-full border-0"
-                allowFullScreen
-                loading="lazy"
-              ></iframe>
+            {/* Embedded Google Map */}
+            <div className="bg-white rounded-3xl overflow-hidden border border-[#1B3022]/10 shadow-sm relative flex flex-col">
+              <div className="aspect-[16/9] w-full relative">
+                <iframe
+                  title="PlantO Nursery Location"
+                  src="https://maps.google.com/maps?q=16.9179266,81.7920531(Plant'O%20Nursery)&t=&z=16&ie=UTF8&iwloc=B&output=embed"
+                  className="w-full h-full border-0"
+                  allowFullScreen
+                  loading="lazy"
+                ></iframe>
+              </div>
+              <div className="p-3 bg-[#F9F8F3] border-t border-[#1B3022]/10 flex items-center justify-between text-xs">
+                <span className="truncate max-w-[220px] text-[#1B3022]/70 text-[11px]">
+                  {settings.contactAddress}
+                </span>
+                <a
+                  href="https://maps.app.goo.gl/esKiMKKoSRFKAcKb8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#2D4F36] hover:underline font-bold text-[11px] shrink-0"
+                >
+                  Get Directions &rarr;
+                </a>
+              </div>
             </div>
           </div>
 

@@ -12,7 +12,7 @@ export const INITIAL_SETTINGS: WebsiteSettings = {
   aboutUsMission: "PlantO believes that every home deserves the beauty of nature. We provide healthy plants, premium gardening accessories, landscaping solutions, and expert guidance to help people create greener and healthier spaces.",
   contactPhone: "+91 98765 43210",
   contactEmail: "care@planto.in",
-  contactAddress: "PlantO Nursery Gardens, NH-16 Highway Road, Green Valley, Hyderabad, Telangana 500081",
+  contactAddress: "Plant'O Nursery, Rajahmundry, Andhra Pradesh 533126",
   workingHours: "Monday - Sunday: 8:00 AM - 8:00 PM",
   instagramUrl: "https://instagram.com/plantonursery",
   facebookUrl: "https://facebook.com/plantonursery",

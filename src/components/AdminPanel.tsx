@@ -123,16 +123,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setEditingProduct(null);
   };
 
-  const handleSaveWhatsAppNumber = () => {
-    const updated = { ...settings, whatsAppNumber: whatsAppInput.trim() };
-    onUpdateSettings(updated);
-    alert(`WhatsApp Business number updated successfully to: +${whatsAppInput.trim()}`);
+  const handleSaveWhatsAppNumber = async () => {
+    try {
+      const updated = { ...settings, whatsAppNumber: whatsAppInput.trim() };
+      await onUpdateSettings(updated);
+      alert(`WhatsApp Business number updated successfully to: +${whatsAppInput.trim()}`);
+    } catch (err: any) {
+      alert(`Failed to update WhatsApp number: ${err?.message || 'Check your admin permissions.'}`);
+    }
   };
 
-  const handleSaveWebsiteSettings = (e: React.FormEvent) => {
+  const handleSaveWebsiteSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateSettings(settingsForm);
-    alert('Website settings saved successfully!');
+    try {
+      await onUpdateSettings(settingsForm);
+      alert('Website settings saved successfully!');
+    } catch (err: any) {
+      alert(`Failed to save website settings: ${err?.message || 'Check your admin permissions.'}`);
+    }
   };
 
   return (
