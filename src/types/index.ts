@@ -61,6 +61,11 @@ export interface WebsiteSettings {
   workingHours: string;
   instagramUrl: string;
   facebookUrl: string;
+  landscapingTagline?: string;
+  landscapingTitle?: string;
+  landscapingDescription?: string;
+  landscapingImage?: string;
+  services?: LandscapingService[];
 }
 
 export interface OrderRecord {

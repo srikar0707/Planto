@@ -16,6 +16,10 @@ export const INITIAL_SETTINGS: WebsiteSettings = {
   workingHours: "Monday - Sunday: 8:00 AM - 8:00 PM",
   instagramUrl: "https://instagram.com/plantonursery",
   facebookUrl: "https://facebook.com/plantonursery",
+  landscapingTagline: "Professional Turnkey Services",
+  landscapingTitle: "Landscaping & Gardening Works",
+  landscapingDescription: "From residential terrace gardens and vertical green walls to commercial office biophilia and estate lawns, our landscape architects bring natural serenity to every space.",
+  landscapingImage: "https://images.unsplash.com/photo-1558904541-efa8c196b27d?auto=format&fit=crop&w=1600&q=80",
 };
 
 export const INITIAL_CATEGORIES: Category[] = [

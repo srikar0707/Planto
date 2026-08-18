@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Product, Category, WebsiteSettings } from '../types';
+import { Product, Category, WebsiteSettings, LandscapingService } from '../types';
 import { store } from '../lib/store';
+import { INITIAL_SERVICES } from '../data/initialData';
 import {
   Shield,
   X,
@@ -18,7 +19,17 @@ import {
   CheckCircle,
   AlertCircle,
   Upload,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Trees,
+  Home,
+  Building,
+  Layers,
+  Briefcase,
+  ShieldCheck,
+  Sparkles,
+  HelpCircle,
+  Loader2,
+  Check
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -52,14 +63,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onDeleteCategory,
   onUpdateSettings,
 }) => {
-
   // Login form state
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState('');
 
   // Active tab inside admin panel
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'categories' | 'whatsapp' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<
+    'dashboard' | 'products' | 'categories' | 'landscaping' | 'whatsapp' | 'settings'
+  >('dashboard');
 
   // Product Editing Modal State
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
@@ -67,15 +79,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Category Editing Modal State
   const [editingCategory, setEditingCategory] = useState<Partial<Category> | null>(null);
 
+  // Landscaping Services list state
+  const [servicesList, setServicesList] = useState<LandscapingService[]>(
+    settings.services && settings.services.length > 0 ? settings.services : INITIAL_SERVICES
+  );
+
+  // Landscaping Service Editing Modal State
+  const [editingService, setEditingService] = useState<Partial<LandscapingService> | null>(null);
+  const [newFeatureInput, setNewFeatureInput] = useState('');
+
+  // Image Uploading Loading State
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
   // WhatsApp Number Form State
   const [whatsAppInput, setWhatsAppInput] = useState(settings.whatsAppNumber);
 
   // General Settings Form State
   const [settingsForm, setSettingsForm] = useState<WebsiteSettings>({ ...settings });
 
-   useEffect(() => {
+  useEffect(() => {
     setSettingsForm({ ...settings });
     setWhatsAppInput(settings.whatsAppNumber);
+    if (settings.services && settings.services.length > 0) {
+      setServicesList(settings.services);
+    }
   }, [settings]);
 
   if (!isOpen) return null;
@@ -90,6 +117,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
+  const handleUploadImageFile = async (file: File): Promise<string> => {
+    setIsUploadingImage(true);
+    try {
+      const publicUrl = await store.uploadProductImage(file);
+      return publicUrl;
+    } catch (err: any) {
+      alert(`Image upload failed: ${err?.message || 'Check storage bucket permissions in Supabase.'}`);
+      throw err;
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const handleSaveProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct || !editingProduct.name || !editingProduct.price) return;
@@ -99,9 +139,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       name: editingProduct.name,
       category: editingProduct.category || 'Indoor Plants',
       price: Number(editingProduct.price),
-      images: editingProduct.images && editingProduct.images.length > 0
-        ? editingProduct.images
-        : ['https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=800&q=80'],
+      images:
+        editingProduct.images && editingProduct.images.length > 0
+          ? editingProduct.images
+          : ['https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=800&q=80'],
       shortDescription: editingProduct.shortDescription || '',
       description: editingProduct.description || '',
       careDifficulty: editingProduct.careDifficulty || 'Easy',
@@ -121,6 +162,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
     onSaveProduct(newProd);
     setEditingProduct(null);
+  };
+
+  const handleSaveCategorySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCategory || !editingCategory.name) return;
+
+    const newCat: Category = {
+      id: editingCategory.id || `new-${Date.now()}`,
+      name: editingCategory.name,
+      group: editingCategory.group || 'Plants',
+      description: editingCategory.description || '',
+      image:
+        editingCategory.image ||
+        'https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=800&q=80',
+    };
+
+    onSaveCategory(newCat);
+    setEditingCategory(null);
   };
 
   const handleSaveWhatsAppNumber = async () => {
@@ -143,6 +202,129 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
+  // Landscaping Overview Save Handler
+  const handleSaveLandscapingOverview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const updated: WebsiteSettings = {
+        ...settingsForm,
+        services: servicesList,
+      };
+      await onUpdateSettings(updated);
+      alert('Landscaping & Gardening Works section saved successfully!');
+    } catch (err: any) {
+      alert(`Failed to save landscaping settings: ${err?.message || 'Check your admin permissions.'}`);
+    }
+  };
+
+  // Service Card Save Handler
+  const handleSaveServiceSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingService || !editingService.title) return;
+
+    const newService: LandscapingService = {
+      id:
+        editingService.id ||
+        `srv-${crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : Date.now()}`,
+      title: editingService.title.trim(),
+      description: editingService.description || '',
+      iconName: editingService.iconName || 'Trees',
+      image:
+        editingService.image ||
+        'https://images.unsplash.com/photo-1558904541-efa8c196b27d?auto=format&fit=crop&w=800&q=80',
+      features:
+        editingService.features && editingService.features.length > 0
+          ? editingService.features
+          : ['Custom site survey', 'Drip irrigation design', 'Maintenance guarantee'],
+    };
+
+    let updatedList: LandscapingService[];
+    if (servicesList.some((s) => s.id === newService.id)) {
+      updatedList = servicesList.map((s) => (s.id === newService.id ? newService : s));
+    } else {
+      updatedList = [...servicesList, newService];
+    }
+
+    setServicesList(updatedList);
+    setEditingService(null);
+    setNewFeatureInput('');
+
+    try {
+      const updatedSettings: WebsiteSettings = {
+        ...settingsForm,
+        services: updatedList,
+      };
+      await onUpdateSettings(updatedSettings);
+      alert(`Service "${newService.title}" saved successfully!`);
+    } catch (err: any) {
+      alert(`Failed to update service: ${err?.message || 'Check permissions.'}`);
+    }
+  };
+
+  const handleDeleteService = async (serviceId: string) => {
+    if (!window.confirm('Are you sure you want to delete this landscaping service card?')) return;
+    const updatedList = servicesList.filter((s) => s.id !== serviceId);
+    setServicesList(updatedList);
+
+    try {
+      const updatedSettings: WebsiteSettings = {
+        ...settingsForm,
+        services: updatedList,
+      };
+      await onUpdateSettings(updatedSettings);
+      alert('Service deleted successfully.');
+    } catch (err: any) {
+      alert(`Failed to delete service: ${err?.message || 'Check permissions.'}`);
+    }
+  };
+
+  const handleResetServicesToDefault = async () => {
+    if (!window.confirm('Reset all landscaping services to the standard 8 turnkey services?')) return;
+    setServicesList(INITIAL_SERVICES);
+    try {
+      const updatedSettings: WebsiteSettings = {
+        ...settingsForm,
+        services: INITIAL_SERVICES,
+      };
+      await onUpdateSettings(updatedSettings);
+      alert('Reset to default 8 landscaping services.');
+    } catch (err: any) {
+      alert(`Failed to reset services: ${err?.message}`);
+    }
+  };
+
+  const getServiceIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'Home':
+        return <Home className="w-5 h-5" />;
+      case 'Building':
+        return <Building className="w-5 h-5" />;
+      case 'Layers':
+        return <Layers className="w-5 h-5" />;
+      case 'Briefcase':
+        return <Briefcase className="w-5 h-5" />;
+      case 'ShieldCheck':
+        return <ShieldCheck className="w-5 h-5" />;
+      case 'Sparkles':
+        return <Sparkles className="w-5 h-5" />;
+      case 'Trees':
+        return <Trees className="w-5 h-5" />;
+      default:
+        return <HelpCircle className="w-5 h-5" />;
+    }
+  };
+
+  const availableIcons = [
+    'Home',
+    'Building',
+    'Layers',
+    'Briefcase',
+    'ShieldCheck',
+    'Sparkles',
+    'Trees',
+    'HelpCircle',
+  ];
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto animate-fadeIn">
       <div
@@ -152,28 +334,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         {/* Top Bar */}
         <div className="bg-[#122116] text-[#F9F8F3] px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Shield className="w-5 h-5 text-[#A3B18A]" />
-            <h2 className="text-lg font-serif font-bold">PlantO Admin Dashboard</h2>
-            {isAdmin && (
-              <span className="bg-[#2D4F36] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider text-[#A3B18A]">
-                Authenticated
+            <div className="p-2 bg-[#2D4F36] rounded-xl text-[#F9F8F3]">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-serif font-bold tracking-wide">
+                PlantO Admin Control Center
+              </h2>
+              <span className="text-[10px] text-[#A7F3D0] uppercase tracking-widest font-semibold block">
+                {isAdmin ? 'Authenticated Administrator' : 'Authentication Required'}
               </span>
-            )}
+            </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             {isAdmin && (
               <button
                 onClick={onLogout}
-                className="text-xs bg-white/10 hover:bg-rose-900/50 text-white px-3 py-1.5 rounded-lg flex items-center space-x-1 transition-colors"
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-[#F9F8F3] text-xs font-bold rounded-lg transition-colors flex items-center space-x-1.5 cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span>Logout</span>
+                <span className="hidden sm:inline">Sign Out</span>
               </button>
             )}
             <button
               onClick={onClose}
-              className="p-1.5 hover:bg-white/10 rounded-full text-white"
+              className="p-2 hover:bg-white/10 rounded-full text-[#F9F8F3] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -192,7 +378,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 Admin Panel Login
               </h3>
               <p className="text-xs text-[#1B3022]/60 mt-1">
-                Enter your credentials to manage products, categories & WhatsApp settings.
+                Enter your credentials to manage products, categories, landscaping & WhatsApp settings.
               </p>
             </div>
 
@@ -255,7 +441,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="w-full md:w-64 bg-[#F1EFE7] border-b md:border-b-0 md:border-r border-[#1B3022]/10 p-4 space-y-1 shrink-0">
               <button
                 onClick={() => setActiveTab('dashboard')}
-                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors ${
+                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors cursor-pointer ${
                   activeTab === 'dashboard'
                     ? 'bg-[#2D4F36] text-white shadow-sm'
                     : 'text-[#1B3022] hover:bg-[#1B3022]/10'
@@ -267,7 +453,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
               <button
                 onClick={() => setActiveTab('products')}
-                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors ${
+                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors cursor-pointer ${
                   activeTab === 'products'
                     ? 'bg-[#2D4F36] text-white shadow-sm'
                     : 'text-[#1B3022] hover:bg-[#1B3022]/10'
@@ -279,7 +465,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
               <button
                 onClick={() => setActiveTab('categories')}
-                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors ${
+                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors cursor-pointer ${
                   activeTab === 'categories'
                     ? 'bg-[#2D4F36] text-white shadow-sm'
                     : 'text-[#1B3022] hover:bg-[#1B3022]/10'
@@ -290,8 +476,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               </button>
 
               <button
+                onClick={() => setActiveTab('landscaping')}
+                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors cursor-pointer ${
+                  activeTab === 'landscaping'
+                    ? 'bg-[#2D4F36] text-white shadow-sm'
+                    : 'text-[#1B3022] hover:bg-[#1B3022]/10'
+                }`}
+              >
+                <Trees className="w-4 h-4 text-[#2D4F36] group-hover:text-white" />
+                <span>Landscaping & Works</span>
+              </button>
+
+              <button
                 onClick={() => setActiveTab('whatsapp')}
-                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors ${
+                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors cursor-pointer ${
                   activeTab === 'whatsapp'
                     ? 'bg-[#2D4F36] text-white shadow-sm'
                     : 'text-[#1B3022] hover:bg-[#1B3022]/10'
@@ -303,7 +501,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
               <button
                 onClick={() => setActiveTab('settings')}
-                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors ${
+                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center space-x-3 transition-colors cursor-pointer ${
                   activeTab === 'settings'
                     ? 'bg-[#2D4F36] text-white shadow-sm'
                     : 'text-[#1B3022] hover:bg-[#1B3022]/10'
@@ -318,129 +516,193 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="flex-1 p-6 sm:p-8 overflow-y-auto">
               {/* TAB 1: DASHBOARD OVERVIEW */}
               {activeTab === 'dashboard' && (
-                <div className="space-y-8">
+                <div className="space-y-6">
                   <div>
                     <h3 className="text-2xl font-serif font-bold text-[#1B3022]">
-                      Store Overview & Analytics
+                      PlantO Nursery Control Center
                     </h3>
                     <p className="text-xs text-[#1B3022]/60 mt-1">
-                      Monitor catalog stats and WhatsApp order routing.
+                      Welcome back! Use the tabs on the left to manage live inventory, categories, landscaping works, and branding.
                     </p>
                   </div>
 
-                  {/* Metric Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div className="bg-white p-6 rounded-2xl border border-[#1B3022]/10 shadow-sm">
-                      <span className="text-xs uppercase font-bold text-[#2D4F36]">Total Products</span>
-                      <span className="text-4xl font-serif font-extrabold text-[#1B3022] block mt-2">
+                  {/* Summary Metric Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white p-5 rounded-2xl border border-[#1B3022]/10 shadow-sm space-y-2">
+                      <div className="flex items-center justify-between text-[#2D4F36]">
+                        <Package className="w-5 h-5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-[#2D4F36]/10 px-2 py-0.5 rounded-full">
+                          Live
+                        </span>
+                      </div>
+                      <h4 className="text-3xl font-serif font-bold text-[#1B3022]">
                         {products.length}
-                      </span>
+                      </h4>
+                      <p className="text-xs text-[#1B3022]/70">Products in Catalog</p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl border border-[#1B3022]/10 shadow-sm">
-                      <span className="text-xs uppercase font-bold text-[#2D4F36]">Active Categories</span>
-                      <span className="text-4xl font-serif font-extrabold text-[#1B3022] block mt-2">
+                    <div className="bg-white p-5 rounded-2xl border border-[#1B3022]/10 shadow-sm space-y-2">
+                      <div className="flex items-center justify-between text-[#2D4F36]">
+                        <FolderTree className="w-5 h-5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-[#2D4F36]/10 px-2 py-0.5 rounded-full">
+                          Active
+                        </span>
+                      </div>
+                      <h4 className="text-3xl font-serif font-bold text-[#1B3022]">
                         {categories.length}
-                      </span>
+                      </h4>
+                      <p className="text-xs text-[#1B3022]/70">Categories Configured</p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-2xl border border-[#1B3022]/10 shadow-sm">
-                      <span className="text-xs uppercase font-bold text-[#2D4F36]">Target WhatsApp</span>
-                      <span className="text-lg font-bold text-[#1B3022] block mt-2 font-mono">
+                    <div className="bg-white p-5 rounded-2xl border border-[#1B3022]/10 shadow-sm space-y-2">
+                      <div className="flex items-center justify-between text-[#2D4F36]">
+                        <Trees className="w-5 h-5" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-[#2D4F36]/10 px-2 py-0.5 rounded-full">
+                          Turnkey
+                        </span>
+                      </div>
+                      <h4 className="text-3xl font-serif font-bold text-[#1B3022]">
+                        {servicesList.length}
+                      </h4>
+                      <p className="text-xs text-[#1B3022]/70">Landscaping Services</p>
+                    </div>
+
+                    <div className="bg-white p-5 rounded-2xl border border-[#1B3022]/10 shadow-sm space-y-2">
+                      <div className="flex items-center justify-between text-[#25D366]">
+                        <MessageCircle className="w-5 h-5 fill-current" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-[#25D366]/10 text-[#128C7E] px-2 py-0.5 rounded-full">
+                          Connected
+                        </span>
+                      </div>
+                      <h4 className="text-base font-bold text-[#1B3022] truncate">
                         +{settings.whatsAppNumber}
-                      </span>
+                      </h4>
+                      <p className="text-xs text-[#1B3022]/70">WhatsApp Order Line</p>
                     </div>
                   </div>
 
-                  {/* Activity Log */}
-                  <div className="bg-white p-6 rounded-2xl border border-[#1B3022]/10 space-y-4">
-                    <h4 className="text-sm font-serif font-bold text-[#1B3022]">
-                      Recent Store Activity
-                    </h4>
-                    <ul className="space-y-3 text-xs text-[#1B3022]/80">
-                      <li className="flex items-center space-x-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-600" />
-                        <span>Monstera Deliciosa and 14 other products initialized in live database.</span>
-                      </li>
-                      <li className="flex items-center space-x-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-600" />
-                        <span>WhatsApp click-to-chat active for +{settings.whatsAppNumber}.</span>
-                      </li>
-                      <li className="flex items-center space-x-2">
-                        <CheckCircle className="w-4 h-4 text-emerald-600" />
-                        <span>8 Landscaping service modules ready for user site enquiries.</span>
-                      </li>
-                    </ul>
+                  {/* Quick Action Banner */}
+                  <div className="bg-gradient-to-r from-[#2D4F36] to-[#1B3022] text-[#F9F8F3] p-6 rounded-3xl shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="space-y-1 text-center md:text-left">
+                      <h4 className="text-lg font-serif font-bold">
+                        Need to update Landscaping Works?
+                      </h4>
+                      <p className="text-xs text-[#F9F8F3]/80">
+                        Add custom descriptions, upload showcase images, and manage gardening service cards in seconds.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('landscaping')}
+                      className="px-5 py-2.5 bg-white text-[#1B3022] hover:bg-[#F9F8F3] rounded-full text-xs font-bold uppercase tracking-wider transition-colors shrink-0 shadow cursor-pointer"
+                    >
+                      Manage Landscaping &rarr;
+                    </button>
                   </div>
                 </div>
               )}
 
-              {/* TAB 2: PRODUCT MANAGEMENT */}
+              {/* TAB 2: PRODUCT CATALOG */}
               {activeTab === 'products' && (
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                       <h3 className="text-2xl font-serif font-bold text-[#1B3022]">
-                        Product Management
+                        Product Catalog
                       </h3>
-                      <p className="text-xs text-[#1B3022]/60">
-                        Add, edit or remove products from the PlantO storefront.
+                      <p className="text-xs text-[#1B3022]/60 mt-1">
+                        Manage your live plant and gardening supplies inventory.
                       </p>
                     </div>
-
                     <button
-                      onClick={() => setEditingProduct({ name: '', price: 299, images: [] })}
-                      className="px-4 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors flex items-center space-x-2 cursor-pointer shadow-sm"
+                      onClick={() =>
+                        setEditingProduct({
+                          name: '',
+                          category: categories[0]?.name || 'Indoor Plants',
+                          price: 299,
+                          images: [],
+                          shortDescription: '',
+                          description: '',
+                          careDifficulty: 'Easy',
+                          availability: 'In Stock',
+                          uses: 'Home Decor',
+                          growingConditions: 'Indoors',
+                          sunlight: 'Bright Indirect Light',
+                          watering: 'Once a week',
+                          soilType: 'Potting mix',
+                          fertilizer: 'Vermicompost',
+                          growthTips: 'Keep in airy spot',
+                          maintenanceLevel: 'Low',
+                          suitableClimate: 'Tropical',
+                          plantSize: 'Medium (1-2 ft)',
+                          featured: false,
+                        })
+                      }
+                      className="px-4 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold rounded-xl flex items-center space-x-2 transition-colors cursor-pointer shadow-sm"
                     >
                       <Plus className="w-4 h-4" />
-                      <span>Add Product</span>
+                      <span>Add New Plant / Product</span>
                     </button>
                   </div>
 
-                  {/* Products Table */}
+                  {/* Product Table */}
                   <div className="bg-white rounded-2xl border border-[#1B3022]/10 overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs">
-                        <thead className="bg-[#F1EFE7] uppercase text-[10px] font-extrabold text-[#1B3022]/70 border-b border-[#1B3022]/10">
+                        <thead className="bg-[#F1EFE7] text-[#1B3022] font-bold uppercase tracking-wider border-b border-[#1B3022]/10">
                           <tr>
-                            <th className="p-4">Product</th>
-                            <th className="p-4">Category</th>
-                            <th className="p-4">Price</th>
-                            <th className="p-4">Difficulty</th>
-                            <th className="p-4">Status</th>
-                            <th className="p-4 text-right">Actions</th>
+                            <th className="p-3.5">Product</th>
+                            <th className="p-3.5">Category</th>
+                            <th className="p-3.5">Price</th>
+                            <th className="p-3.5">Care</th>
+                            <th className="p-3.5">Status</th>
+                            <th className="p-3.5 text-right">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[#1B3022]/10">
                           {products.map((p) => (
-                            <tr key={p.id} className="hover:bg-[#F9F8F3]">
-                              <td className="p-4 flex items-center space-x-3">
+                            <tr key={p.id} className="hover:bg-[#F9F8F3] transition-colors">
+                              <td className="p-3.5 flex items-center space-x-3">
                                 <img
-                                  src={p.images[0]}
-                                  alt=""
-                                  className="w-10 h-10 rounded-lg object-cover border"
+                                  src={p.images?.[0] || 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=150&q=80'}
+                                  alt={p.name}
+                                  className="w-10 h-10 rounded-lg object-cover border border-[#1B3022]/10 shrink-0"
                                 />
-                                <span className="font-bold text-[#1B3022]">{p.name}</span>
+                                <div>
+                                  <span className="font-bold text-[#1B3022] block">{p.name}</span>
+                                  <span className="text-[10px] text-[#1B3022]/50 truncate max-w-xs block">
+                                    {p.shortDescription}
+                                  </span>
+                                </div>
                               </td>
-                              <td className="p-4 font-medium">{p.category}</td>
-                              <td className="p-4 font-extrabold">₹{p.price}</td>
-                              <td className="p-4">{p.careDifficulty}</td>
-                              <td className="p-4">
-                                <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                              <td className="p-3.5 text-[#1B3022]/80">{p.category}</td>
+                              <td className="p-3.5 font-bold text-[#2D4F36]">₹{p.price}</td>
+                              <td className="p-3.5">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F1EFE7] text-[#1B3022]">
+                                  {p.careDifficulty}
+                                </span>
+                              </td>
+                              <td className="p-3.5">
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                    p.availability === 'In Stock'
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : 'bg-amber-100 text-amber-800'
+                                  }`}
+                                >
                                   {p.availability}
                                 </span>
                               </td>
-                              <td className="p-4 text-right space-x-2">
+                              <td className="p-3.5 text-right space-x-2">
                                 <button
                                   onClick={() => setEditingProduct(p)}
-                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
+                                  className="p-1.5 text-[#2D4F36] hover:bg-[#2D4F36]/10 rounded-lg transition-colors cursor-pointer"
                                   title="Edit"
                                 >
                                   <Edit className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={() => onDeleteProduct(p.id)}
-                                  className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg"
+                                  className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                   title="Delete"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -455,338 +717,447 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
               )}
 
-              {/* TAB 3: CATEGORY MANAGEMENT */}
+              {/* TAB 3: CATEGORIES */}
               {activeTab === 'categories' && (
-  <div className="space-y-6">
-
-    {/* Category Header */}
-    <div className="flex justify-between items-center">
-      <div>
-        <h3 className="text-2xl font-serif font-bold text-[#1B3022]">
-          Category Management
-        </h3>
-
-        <p className="text-xs text-[#1B3022]/60">
-          Manage product categories and group associations.
-        </p>
-      </div>
-
-      {/* ADD CATEGORY BUTTON */}
-      <button
-  type="button"
-  onClick={(e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    console.log("ADD CATEGORY CLICKED");
-
-    setEditingCategory({
-      name: '',
-      group: 'Plants',
-      description: '',
-      image: '',
-    });
-  }}
-  className="relative z-10 px-4 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors flex items-center space-x-2 cursor-pointer shadow-sm pointer-events-auto"
->
-  <Plus className="w-4 h-4" />
-  <span>Add Category</span>
-</button>
-    </div>
-
-    {/* CATEGORY LIST */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
-      {categories.map((c) => (
-        <div
-          key={c.id}
-          className="bg-white p-4 rounded-2xl border border-[#1B3022]/10 flex items-center justify-between"
-        >
-
-          <div className="flex items-center space-x-3">
-
-            <img
-              src={c.image}
-              alt=""
-              className="w-12 h-12 rounded-xl object-cover"
-            />
-
-            <div>
-              <h4 className="text-xs font-bold text-[#1B3022]">
-                {c.name}
-              </h4>
-
-              <span className="text-[10px] text-[#2D4F36] uppercase font-bold">
-                {c.group}
-              </span>
-            </div>
-
-          </div>
-
-          {/* DELETE CATEGORY */}
-          <button
-            type="button"
-            onClick={() => onDeleteCategory(c.id)}
-            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg"
-            title="Delete Category"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-
-        </div>
-      ))}
-
-      {/* EMPTY STATE */}
-      {categories.length === 0 && (
-        <div className="col-span-full p-8 text-center bg-white rounded-2xl border border-[#1B3022]/10">
-          <FolderTree className="w-8 h-8 mx-auto mb-2 text-[#2D4F36]/50" />
-
-          <p className="text-sm font-bold text-[#1B3022]">
-            No categories yet
-          </p>
-
-          <p className="text-xs text-[#1B3022]/60 mt-1">
-            Click "Add Category" to create your first category.
-          </p>
-        </div>
-      )}
-
-    </div>
-
-  </div>
-)}
-
-{/* CATEGORY ADD / EDIT MODAL */}
-{editingCategory && (
-  <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-
-    <div
-      className="bg-[#F9F8F3] w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-[#1B3022]/20 space-y-5 shadow-2xl"
-      onClick={(e) => e.stopPropagation()}
-    >
-
-      {/* MODAL HEADER */}
-      <div className="flex items-center justify-between">
-
-        <h3 className="text-xl font-serif font-bold text-[#1B3022]">
-  {editingCategory.id ? 'Edit Category' : 'Add New Category'}
-</h3>
-
-        <button
-          type="button"
-          onClick={() => setEditingCategory(null)}
-          className="p-2 hover:bg-[#1B3022]/10 rounded-full"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-      </div>
-
-      {/* FORM */}
-      <div className="space-y-4 text-xs">
-
-        {/* CATEGORY NAME */}
-        <div>
-          <label className="block font-bold mb-1">
-            Category Name *
-          </label>
-
-          <input
-            type="text"
-            required
-            autoFocus
-            placeholder="e.g. Indoor Plants"
-            value={editingCategory.name || ''}
-            onChange={(e) =>
-              setEditingCategory({
-                ...editingCategory,
-                name: e.target.value,
-              })
-            }
-            className="w-full p-3 bg-white border border-[#1B3022]/15 rounded-xl focus:outline-none focus:border-[#2D4F36]"
-          />
-        </div>
-
-        {/* GROUP */}
-        <div>
-          <label className="block font-bold mb-1">
-            Group *
-          </label>
-
-          <select
-            value={editingCategory.group || 'Plants'}
-            onChange={(e) =>
-              setEditingCategory({
-                ...editingCategory,
-                group: e.target.value as 'Plants' | 'Other',
-              })
-            }
-            className="w-full p-3 bg-white border border-[#1B3022]/15 rounded-xl focus:outline-none focus:border-[#2D4F36]"
-          >
-            <option value="Plants">
-              Plants
-            </option>
-
-            <option value="Other">
-              Other
-            </option>
-          </select>
-        </div>
-
-        {/* DESCRIPTION */}
-        <div>
-          <label className="block font-bold mb-1">
-            Description
-          </label>
-
-          <textarea
-            rows={3}
-            placeholder="Short description of this category"
-            value={editingCategory.description || ''}
-            onChange={(e) =>
-              setEditingCategory({
-                ...editingCategory,
-                description: e.target.value,
-              })
-            }
-            className="w-full p-3 bg-white border border-[#1B3022]/15 rounded-xl focus:outline-none focus:border-[#2D4F36]"
-          />
-        </div>
-
-        {/* IMAGE URL */}
-        <div>
-          <label className="block font-bold mb-1">
-            Image URL
-          </label>
-
-          <input
-            type="url"
-            placeholder="https://..."
-            value={editingCategory.image || ''}
-            onChange={(e) =>
-              setEditingCategory({
-                ...editingCategory,
-                image: e.target.value,
-              })
-            }
-            className="w-full p-3 bg-white border border-[#1B3022]/15 rounded-xl focus:outline-none focus:border-[#2D4F36]"
-          />
-        </div>
-
-      </div>
-
-      {/* MODAL BUTTONS */}
-      <div className="flex justify-end gap-3 pt-3">
-
-        {/* CANCEL */}
-        <button
-          type="button"
-          onClick={() => setEditingCategory(null)}
-          className="px-5 py-2.5 border border-[#1B3022]/20 rounded-full font-bold hover:bg-[#1B3022]/5"
-        >
-          Cancel
-        </button>
-
-        {/* SAVE */}
-        <button
-          type="button"
-          disabled={!editingCategory.name?.trim()}
-          onClick={() => {
-
-            if (!editingCategory.name?.trim()) {
-              return;
-            }
-
-            const category: Category = {
-              id:
-                editingCategory.id ||
-                `new-${crypto.randomUUID()}`,
-
-              name: editingCategory.name.trim(),
-
-              group:
-                editingCategory.group || 'Plants',
-
-              description:
-                editingCategory.description || '',
-
-              image:
-                editingCategory.image || '',
-            };
-
-            onSaveCategory(category);
-
-            setEditingCategory(null);
-          }}
-          className="px-6 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white font-bold rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          <span className="flex items-center gap-2">
-            <Save className="w-4 h-4" />
-            Save Category
-          </span>
-        </button>
-
-      </div>
-
-    </div>
-  </div>
-)}
-
-              {/* TAB 4: WHATSAPP SETTINGS */}
-              {activeTab === 'whatsapp' && (
-                <div className="max-w-xl space-y-6">
-                  <div>
-                    <h3 className="text-2xl font-serif font-bold text-[#1B3022]">
-                      WhatsApp Settings
-                    </h3>
-                    <p className="text-xs text-[#1B3022]/60">
-                      Configure the business WhatsApp number that receives order checkouts.
-                    </p>
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-2xl font-serif font-bold text-[#1B3022]">
+                        Store Categories
+                      </h3>
+                      <p className="text-xs text-[#1B3022]/60 mt-1">
+                        Organize your catalog into Plants, Pots, Fertilizers & Tools.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() =>
+                        setEditingCategory({
+                          name: '',
+                          group: 'Plants',
+                          description: '',
+                          image: '',
+                        })
+                      }
+                      className="px-4 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold rounded-xl flex items-center space-x-2 transition-colors cursor-pointer shadow-sm"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add New Category</span>
+                    </button>
                   </div>
 
-                  <div className="bg-white p-6 rounded-2xl border border-[#1B3022]/10 space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022] mb-1">
-                        Business WhatsApp Number (with Country Code, no + or spaces)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 919876543210"
-                        value={whatsAppInput}
-                        onChange={(e) => setWhatsAppInput(e.target.value)}
-                        className="w-full bg-[#F9F8F3] px-4 py-3 rounded-xl border border-[#1B3022]/15 text-sm font-mono text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
-                      />
-                      <span className="text-[11px] text-[#1B3022]/50 mt-1 block">
-                        Example for India: <strong>919876543210</strong>
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={handleSaveWhatsAppNumber}
-                      className="px-6 py-3 bg-[#25D366] hover:bg-[#1ebd59] text-white text-xs font-bold uppercase tracking-wider rounded-full transition-colors flex items-center space-x-2 shadow-md cursor-pointer"
-                    >
-                      <Save className="w-4 h-4" />
-                      <span>Save WhatsApp Number</span>
-                    </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {categories.map((cat) => (
+                      <div
+                        key={cat.id}
+                        className="bg-white p-4 rounded-2xl border border-[#1B3022]/10 shadow-sm flex items-center justify-between"
+                      >
+                        <div className="flex items-center space-x-3 overflow-hidden">
+                          <img
+                            src={cat.image || 'https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=150&q=80'}
+                            alt={cat.name}
+                            className="w-12 h-12 rounded-xl object-cover border border-[#1B3022]/10 shrink-0"
+                          />
+                          <div className="overflow-hidden">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#2D4F36] block">
+                              {cat.group}
+                            </span>
+                            <h4 className="font-serif font-bold text-sm text-[#1B3022] truncate">
+                              {cat.name}
+                            </h4>
+                            <p className="text-[10px] text-[#1B3022]/60 truncate max-w-xs">
+                              {cat.description}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-1 shrink-0 ml-2">
+                          <button
+                            onClick={() => setEditingCategory(cat)}
+                            className="p-1.5 text-[#2D4F36] hover:bg-[#2D4F36]/10 rounded-lg cursor-pointer"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => onDeleteCategory(cat.id)}
+                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* TAB 5: WEBSITE SETTINGS & NURSERY CONTACT INFO */}
-              {activeTab === 'settings' && (
-                <form onSubmit={handleSaveWebsiteSettings} className="space-y-6 max-w-4xl">
+              {/* TAB 4: LANDSCAPING & GARDENING WORKS (NEW) */}
+              {activeTab === 'landscaping' && (
+                <div className="space-y-8">
+                  {/* Top Title & Header */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-[#1B3022]/10">
+                    <div>
+                      <div className="flex items-center space-x-2 text-[#2D4F36] mb-1">
+                        <Trees className="w-5 h-5" />
+                        <span className="text-xs font-bold uppercase tracking-widest">
+                          Turnkey Landscape Management
+                        </span>
+                      </div>
+                      <h3 className="text-2xl font-serif font-bold text-[#1B3022]">
+                        Landscaping & Gardening Works
+                      </h3>
+                      <p className="text-xs text-[#1B3022]/65 mt-0.5">
+                        Manage section descriptions, upload/replace showcase images, and modify service cards.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={handleResetServicesToDefault}
+                        className="px-3 py-2 border border-[#1B3022]/20 hover:bg-[#1B3022]/5 text-[#1B3022] text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                        title="Reset services list to default 8 cards"
+                      >
+                        Reset Defaults
+                      </button>
+                      <button
+                        onClick={() =>
+                          setEditingService({
+                            title: '',
+                            description: '',
+                            iconName: 'Trees',
+                            image: '',
+                            features: ['Site inspection & soil test', 'Automated drip irrigation', 'Ongoing maintenance warranty'],
+                          })
+                        }
+                        className="px-4 py-2 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer shadow-sm"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add New Service</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Section Overview & Showcase Image Form */}
+                  <form
+                    onSubmit={handleSaveLandscapingOverview}
+                    className="bg-white p-6 sm:p-8 rounded-3xl border border-[#1B3022]/10 shadow-sm space-y-6"
+                  >
+                    <div className="flex items-center justify-between pb-3 border-b border-[#1B3022]/10">
+                      <div>
+                        <h4 className="text-base font-serif font-bold text-[#2D4F36]">
+                          Section Overview & Media Banner
+                        </h4>
+                        <p className="text-xs text-[#1B3022]/60">
+                          This content appears directly at the top of the Landscaping & Gardening Works section.
+                        </p>
+                      </div>
+                      <button
+                        type="submit"
+                        className="px-5 py-2 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors flex items-center space-x-1.5 cursor-pointer shadow-sm"
+                      >
+                        <Save className="w-3.5 h-3.5" />
+                        <span>Save Section Info</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                          Section Tagline / Category Subtitle
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Professional Turnkey Services"
+                          value={settingsForm.landscapingTagline || ''}
+                          onChange={(e) =>
+                            setSettingsForm({ ...settingsForm, landscapingTagline: e.target.value })
+                          }
+                          className="w-full bg-[#F9F8F3] p-2.5 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                          Section Title
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Landscaping & Gardening Works"
+                          value={settingsForm.landscapingTitle || ''}
+                          onChange={(e) =>
+                            setSettingsForm({ ...settingsForm, landscapingTitle: e.target.value })
+                          }
+                          className="w-full bg-[#F9F8F3] p-2.5 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Section Description Textarea */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                        Section Description *
+                      </label>
+                      <textarea
+                        rows={3}
+                        required
+                        placeholder="Write a compelling overview of your nursery's landscaping services, residential gardens, and turnkey project capabilities..."
+                        value={settingsForm.landscapingDescription || ''}
+                        onChange={(e) =>
+                          setSettingsForm({ ...settingsForm, landscapingDescription: e.target.value })
+                        }
+                        className="w-full bg-[#F9F8F3] p-3 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36] leading-relaxed"
+                      ></textarea>
+                      <span className="text-[10px] text-[#1B3022]/60 mt-1 block">
+                        This description is displayed prominently under the main heading on the homepage.
+                      </span>
+                    </div>
+
+                    {/* Section Showcase Image Upload */}
+                    <div className="space-y-3 pt-2 border-t border-[#1B3022]/10">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022]">
+                        Section Showcase / Featured Landscape Image
+                      </label>
+
+                      {/* Image Preview if Present */}
+                      {settingsForm.landscapingImage ? (
+                        <div className="relative rounded-2xl overflow-hidden border border-[#1B3022]/15 bg-[#1B3022] aspect-[21/8] max-h-48 group">
+                          <img
+                            src={settingsForm.landscapingImage}
+                            alt="Showcase Preview"
+                            className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-between p-4 text-white">
+                            <span className="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
+                              Active Showcase Image
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              <label className="px-3 py-1.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold rounded-lg cursor-pointer transition-colors shadow">
+                                <span>Replace Image</span>
+                                <input
+                                  type="file"
+                                  accept="image/png, image/jpeg, image/webp"
+                                  className="hidden"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const url = await handleUploadImageFile(file);
+                                      setSettingsForm({ ...settingsForm, landscapingImage: url });
+                                    }
+                                  }}
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setSettingsForm({ ...settingsForm, landscapingImage: '' })}
+                                className="px-3 py-1.5 bg-rose-600/90 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-6 border-2 border-dashed border-[#1B3022]/20 rounded-2xl bg-[#F9F8F3] text-center space-y-3">
+                          <ImageIcon className="w-8 h-8 text-[#2D4F36]/60 mx-auto" />
+                          <div className="space-y-1">
+                            <p className="text-xs font-bold text-[#1B3022]">
+                              No showcase banner image configured
+                            </p>
+                            <p className="text-[11px] text-[#1B3022]/60">
+                              Upload a high-resolution landscape photo to showcase your turnkey projects.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Image Upload Action Buttons */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                          <label className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold rounded-xl cursor-pointer transition-colors shadow-sm">
+                            {isUploadingImage ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Uploading to Supabase Storage...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4" />
+                                <span>Upload Image File (PNG / JPG / WebP)</span>
+                              </>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/png, image/jpeg, image/webp"
+                              className="hidden"
+                              disabled={isUploadingImage}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const url = await handleUploadImageFile(file);
+                                  setSettingsForm({ ...settingsForm, landscapingImage: url });
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
+
+                        <div>
+                          <input
+                            type="url"
+                            placeholder="Or paste an image web URL (https://...)"
+                            value={settingsForm.landscapingImage || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, landscapingImage: e.target.value })
+                            }
+                            className="w-full bg-[#F9F8F3] px-3 py-2 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+
+                  {/* Landscaping Services Cards Management Grid */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-lg font-serif font-bold text-[#1B3022]">
+                          Landscaping & Gardening Service Offerings ({servicesList.length})
+                        </h4>
+                        <p className="text-xs text-[#1B3022]/60">
+                          Edit or add individual service cards with custom photos, icons, and bullet features.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {servicesList.map((service) => (
+                        <div
+                          key={service.id}
+                          className="bg-white rounded-2xl border border-[#1B3022]/10 overflow-hidden shadow-sm flex flex-col justify-between hover:border-[#2D4F36]/30 transition-all"
+                        >
+                          <div>
+                            {/* Card Image Thumbnail */}
+                            <div className="relative aspect-[16/10] bg-[#F1EFE7] overflow-hidden">
+                              <img
+                                src={service.image}
+                                alt={service.title}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute top-2 left-2 p-1.5 bg-white/90 backdrop-blur-md rounded-xl text-[#2D4F36] shadow-sm border border-[#1B3022]/10">
+                                {getServiceIconComponent(service.iconName)}
+                              </div>
+                            </div>
+
+                            {/* Card Details */}
+                            <div className="p-4 space-y-2">
+                              <h5 className="font-serif font-bold text-base text-[#1B3022]">
+                                {service.title}
+                              </h5>
+                              <p className="text-xs text-[#1B3022]/70 line-clamp-2">
+                                {service.description}
+                              </p>
+
+                              <div className="pt-2 flex flex-wrap gap-1">
+                                {service.features?.slice(0, 2).map((feat, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#F1EFE7] text-[#1B3022]/80"
+                                  >
+                                    {feat}
+                                  </span>
+                                ))}
+                                {service.features?.length > 2 && (
+                                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold text-[#2D4F36]">
+                                    +{service.features.length - 2} more
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card Footer Actions */}
+                          <div className="p-4 pt-0 flex items-center justify-between border-t border-[#1B3022]/10 mt-3 pt-3">
+                            <button
+                              onClick={() => setEditingService(service)}
+                              className="px-3 py-1.5 bg-[#F1EFE7] hover:bg-[#2D4F36] text-[#1B3022] hover:text-white rounded-lg text-xs font-bold transition-colors flex items-center space-x-1 cursor-pointer"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                              <span>Edit Service</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteService(service.id)}
+                              className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              title="Delete service card"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 5: WHATSAPP SETTINGS */}
+              {activeTab === 'whatsapp' && (
+                <div className="space-y-6 max-w-2xl">
                   <div>
                     <h3 className="text-2xl font-serif font-bold text-[#1B3022]">
-                      Nursery Contact Info & Website Settings
+                      WhatsApp Direct Order Routing
                     </h3>
-                    <p className="text-xs text-[#1B3022]/60">
-                      Update nursery contact details, address, working hours, logo, and slogans displayed across the website.
+                    <p className="text-xs text-[#1B3022]/60 mt-1">
+                      All storefront checkouts and gardening enquiries dispatch directly to this number.
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-                    {/* Nursery Contact Details Box */}
-                    <div className="bg-white p-6 rounded-2xl border border-[#1B3022]/10 space-y-4">
+                  <div className="bg-white p-6 rounded-3xl border border-[#1B3022]/10 shadow-sm space-y-4">
+                    <div className="flex items-center space-x-3 text-[#25D366] pb-3 border-b border-[#1B3022]/10">
+                      <MessageCircle className="w-6 h-6 fill-current" />
+                      <span className="font-bold text-sm text-[#1B3022]">
+                        Business WhatsApp Configuration
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                        Active WhatsApp Number (Include Country Code, No + or spaces)
+                      </label>
+                      <input
+                        type="text"
+                        value={whatsAppInput}
+                        onChange={(e) => setWhatsAppInput(e.target.value)}
+                        placeholder="e.g. 919876543210"
+                        className="w-full bg-[#F9F8F3] px-4 py-3 rounded-xl border border-[#1B3022]/20 font-mono text-sm text-[#1B3022] focus:outline-none focus:border-[#25D366]"
+                      />
+                    </div>
+
+                    <div className="pt-2">
+                      <button
+                        onClick={handleSaveWhatsAppNumber}
+                        className="px-6 py-3 bg-[#25D366] hover:bg-[#1ebd59] text-white text-xs font-bold uppercase tracking-widest rounded-full transition-colors shadow-md cursor-pointer flex items-center space-x-2"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>Update WhatsApp Number</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 6: WEBSITE SETTINGS */}
+              {activeTab === 'settings' && (
+                <form onSubmit={handleSaveWebsiteSettings} className="space-y-6">
+                  <div>
+                    <h3 className="text-2xl font-serif font-bold text-[#1B3022]">
+                      Nursery Profile & Branding
+                    </h3>
+                    <p className="text-xs text-[#1B3022]/60 mt-1">
+                      Manage official logo, business address, and multi-language nursery slogans.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Contact Info */}
+                    <div className="bg-white p-6 rounded-3xl border border-[#1B3022]/10 shadow-sm space-y-4">
                       <h4 className="text-sm font-serif font-bold text-[#2D4F36] pb-2 border-b border-[#1B3022]/10">
                         Nursery Contact Information
                       </h4>
@@ -837,7 +1208,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                       <div>
                         <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
-                          Physical Nursery Address
+                          Physical Nursery Address (Linked to Google Maps)
                         </label>
                         <textarea
                           rows={2}
@@ -863,37 +1234,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           className="w-full bg-[#F9F8F3] p-2.5 rounded-xl border border-[#1B3022]/15 focus:outline-none focus:border-[#2D4F36]"
                         />
                       </div>
-
-                      <div>
-                        <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
-                          WhatsApp Order Routing Number
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="919876543210"
-                          value={settingsForm.whatsAppNumber || ''}
-                          onChange={(e) =>
-                            setSettingsForm({ ...settingsForm, whatsAppNumber: e.target.value })
-                          }
-                          className="w-full bg-[#F9F8F3] p-2.5 rounded-xl border border-[#1B3022]/15 font-mono text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
-                        />
-                      </div>
                     </div>
 
-                    {/* Branding & Social Links Box */}
-                    <div className="bg-white p-6 rounded-2xl border border-[#1B3022]/10 space-y-4">
+                    {/* Branding & Logo */}
+                    <div className="bg-white p-6 rounded-3xl border border-[#1B3022]/10 shadow-sm space-y-4">
                       <h4 className="text-sm font-serif font-bold text-[#2D4F36] pb-2 border-b border-[#1B3022]/10">
-                        Logo & Branding Slogans
+                        Visual Identity & Typography
                       </h4>
 
                       <div>
                         <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
-                          Nursery Custom Logo (Supabase Storage upload)
+                          Custom Logo (Upload PNG/SVG to Supabase)
                         </label>
                         <div className="space-y-2 bg-[#F9F8F3] p-3 rounded-xl border border-[#1B3022]/15">
                           {settingsForm.logoUrl && (
-                            <div className="flex items-center space-x-3">
-                              <img src={settingsForm.logoUrl} alt="Logo Preview" className="h-10 object-contain" />
+                            <div className="flex items-center space-x-3 bg-white p-2 rounded-lg border border-[#1B3022]/10">
+                              <img
+                                src={settingsForm.logoUrl}
+                                alt="Custom Logo"
+                                className="h-10 w-auto object-contain"
+                              />
                               <button
                                 type="button"
                                 onClick={() => setSettingsForm({ ...settingsForm, logoUrl: '' })}
@@ -911,15 +1271,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                 type="file"
                                 accept="image/png, image/jpeg, image/svg+xml"
                                 className="hidden"
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  try { setSettingsForm({ ...settingsForm, logoUrl: await store.uploadProductImage(file) }); } catch { alert('Logo upload failed. Check your admin permissions.'); }
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    try {
+                                      const url = await handleUploadImageFile(file);
+                                      setSettingsForm({ ...settingsForm, logoUrl: url });
+                                    } catch {
+                                      // error alert handled in helper
+                                    }
                                   }
                                 }}
                               />
                             </label>
-                            <span className="text-[10px] text-[#1B3022]/60">Upload replaces the current logo.</span>
+                            <span className="text-[10px] text-[#1B3022]/60">Upload replaces current logo.</span>
                           </div>
                         </div>
                       </div>
@@ -1090,14 +1455,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    {/* PNG / File Upload Button */}
                     <div>
                       <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1B3022] mb-1">
-                        Option 1: Upload PNG / Image File
+                        Upload Image File
                       </label>
                       <label className="flex items-center justify-center space-x-2 px-3 py-2.5 bg-[#2D4F36] text-white hover:bg-[#1B3022] rounded-xl cursor-pointer transition-colors text-xs font-bold shadow-sm">
                         <Upload className="w-4 h-4" />
-                        <span>Upload Local PNG / JPG</span>
+                        <span>Choose Local PNG / JPG</span>
                         <input
                           type="file"
                           accept="image/png, image/jpeg, image/webp"
@@ -1105,14 +1469,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              try { setEditingProduct({ ...editingProduct, images: [await store.uploadProductImage(file)] }); } catch { alert('Image upload failed. Check your admin permissions.'); }
+                              try {
+                                const url = await handleUploadImageFile(file);
+                                setEditingProduct({ ...editingProduct, images: [url] });
+                              } catch {
+                                // Handled in helper
+                              }
                             }
                           }}
                         />
                       </label>
                     </div>
 
-                    <p className="text-[10px] text-[#1B3022]/60 self-end">Images are stored in private-admin-managed Supabase Storage.</p>
+                    <div>
+                      <label className="block text-[10px] font-extrabold uppercase tracking-wider text-[#1B3022] mb-1">
+                        Or Paste Image URL
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="https://..."
+                        value={editingProduct.images?.[0] || ''}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, images: [e.target.value] })}
+                        className="w-full p-2.5 bg-white border rounded-xl text-xs"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1131,15 +1511,367 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <button
                   type="button"
                   onClick={() => setEditingProduct(null)}
-                  className="px-4 py-2 border rounded-full font-bold"
+                  className="px-4 py-2 border rounded-full font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-[#2D4F36] text-white font-bold rounded-full"
+                  className="px-6 py-2 bg-[#2D4F36] text-white font-bold rounded-full cursor-pointer shadow-md"
                 >
                   Save Product
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT CATEGORY MODAL */}
+      {editingCategory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#F9F8F3] w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-[#1B3022]/20 max-h-[85vh] overflow-y-auto space-y-4">
+            <h3 className="text-xl font-serif font-bold text-[#1B3022]">
+              {editingCategory.id ? 'Edit Category' : 'Add New Category'}
+            </h3>
+
+            <form onSubmit={handleSaveCategorySubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold mb-1">Category Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Exotic Ferns"
+                  value={editingCategory.name || ''}
+                  onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
+                  className="w-full p-2.5 bg-white border rounded-xl"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1">Category Group</label>
+                <select
+                  value={editingCategory.group || 'Plants'}
+                  onChange={(e) =>
+                    setEditingCategory({
+                      ...editingCategory,
+                      group: e.target.value as 'Plants' | 'Other',
+                    })
+                  }
+                  className="w-full p-2.5 bg-white border rounded-xl"
+                >
+                  <option value="Plants">Plants Group</option>
+                  <option value="Other">Other Gardening Products</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1">Category Image</label>
+                <div className="space-y-2 bg-[#F1EFE7] p-3 rounded-xl border border-[#1B3022]/15">
+                  {editingCategory.image && (
+                    <img
+                      src={editingCategory.image}
+                      alt="Preview"
+                      className="w-16 h-16 rounded-lg object-cover border"
+                    />
+                  )}
+                  <label className="flex items-center justify-center space-x-2 px-3 py-2 bg-[#2D4F36] text-white rounded-xl cursor-pointer text-xs font-bold">
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Image File</span>
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/webp"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const url = await handleUploadImageFile(file);
+                          setEditingCategory({ ...editingCategory, image: url });
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={editingCategory.description || ''}
+                  onChange={(e) =>
+                    setEditingCategory({ ...editingCategory, description: e.target.value })
+                  }
+                  className="w-full p-2.5 bg-white border rounded-xl"
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditingCategory(null)}
+                  className="px-4 py-2 border rounded-full font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-[#2D4F36] text-white font-bold rounded-full cursor-pointer shadow-md"
+                >
+                  Save Category
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT / CREATE LANDSCAPING SERVICE MODAL */}
+      {editingService && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[#F9F8F3] w-full max-w-2xl p-6 sm:p-8 rounded-3xl border border-[#1B3022]/20 max-h-[90vh] overflow-y-auto space-y-5 text-[#1B3022]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#1B3022]/10">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-2 bg-[#2D4F36]/10 text-[#2D4F36] rounded-xl">
+                  <Trees className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-serif font-bold text-[#1B3022]">
+                    {editingService.id ? 'Edit Landscaping Service' : 'Add New Landscaping Service'}
+                  </h3>
+                  <span className="text-[10px] text-[#1B3022]/60 uppercase tracking-wider font-semibold">
+                    Turnkey Gardening Offering
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingService(null)}
+                className="p-2 hover:bg-[#1B3022]/10 rounded-full cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveServiceSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                  Service Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Terrace Garden Development"
+                  value={editingService.title || ''}
+                  onChange={(e) => setEditingService({ ...editingService, title: e.target.value })}
+                  className="w-full p-2.5 bg-white border border-[#1B3022]/20 rounded-xl focus:outline-none focus:border-[#2D4F36]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                  Service Description *
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="Describe what this turnkey landscape offering includes, ideal spaces, and benefits..."
+                  value={editingService.description || ''}
+                  onChange={(e) =>
+                    setEditingService({ ...editingService, description: e.target.value })
+                  }
+                  className="w-full p-2.5 bg-white border border-[#1B3022]/20 rounded-xl focus:outline-none focus:border-[#2D4F36]"
+                ></textarea>
+              </div>
+
+              {/* Service Card Image Upload & Replace */}
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                  Service Card Image *
+                </label>
+                <div className="space-y-3 bg-[#F1EFE7] p-4 rounded-2xl border border-[#1B3022]/15">
+                  {editingService.image ? (
+                    <div className="flex items-center space-x-4 bg-white p-3 rounded-xl border border-[#1B3022]/10">
+                      <img
+                        src={editingService.image}
+                        alt="Service Preview"
+                        className="w-20 h-16 rounded-lg object-cover border border-[#1B3022]/20 shadow-sm shrink-0"
+                      />
+                      <div className="space-y-1 overflow-hidden flex-1">
+                        <span className="text-[11px] font-bold text-[#2D4F36] block">
+                          Current Service Photo
+                        </span>
+                        <p className="text-[10px] text-[#1B3022]/60 truncate">{editingService.image}</p>
+                        <button
+                          type="button"
+                          onClick={() => setEditingService({ ...editingService, image: '' })}
+                          className="text-xs text-rose-600 hover:underline font-bold block cursor-pointer"
+                        >
+                          Remove Image
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-[#1B3022]/60 italic bg-white p-3 rounded-xl border border-[#1B3022]/10 text-center">
+                      No service photo uploaded yet. Choose a file below or paste a photo link.
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="flex items-center justify-center space-x-2 px-3 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white rounded-xl cursor-pointer text-xs font-bold shadow-sm transition-colors">
+                        {isUploadingImage ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Uploading...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4" />
+                            <span>Upload PNG / JPG File</span>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          className="hidden"
+                          disabled={isUploadingImage}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const url = await handleUploadImageFile(file);
+                              setEditingService({ ...editingService, image: url });
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+
+                    <div>
+                      <input
+                        type="url"
+                        placeholder="Or paste image URL (https://...)"
+                        value={editingService.image || ''}
+                        onChange={(e) =>
+                          setEditingService({ ...editingService, image: e.target.value })
+                        }
+                        className="w-full p-2.5 bg-white border border-[#1B3022]/20 rounded-xl text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Icon Selector */}
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1.5">
+                  Select Card Icon
+                </label>
+                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 bg-[#F1EFE7] p-3 rounded-2xl border border-[#1B3022]/15">
+                  {availableIcons.map((iconName) => (
+                    <button
+                      type="button"
+                      key={iconName}
+                      onClick={() => setEditingService({ ...editingService, iconName })}
+                      className={`p-2.5 rounded-xl flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
+                        editingService.iconName === iconName
+                          ? 'bg-[#2D4F36] text-white shadow-md'
+                          : 'bg-white text-[#1B3022] hover:bg-[#1B3022]/10 border border-[#1B3022]/10'
+                      }`}
+                    >
+                      {getServiceIconComponent(iconName)}
+                      <span className="text-[9px] font-semibold truncate max-w-full">
+                        {iconName}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Key Features Bullet Points */}
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                  Key Service Features & Highlights
+                </label>
+                <div className="space-y-2 bg-[#F1EFE7] p-3 rounded-2xl border border-[#1B3022]/15">
+                  <div className="flex flex-wrap gap-1.5">
+                    {editingService.features?.map((feat, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#1B3022]/10 rounded-full text-xs text-[#1B3022] shadow-sm"
+                      >
+                        <Check className="w-3 h-3 text-[#2D4F36]" />
+                        <span>{feat}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = editingService.features?.filter((_, i) => i !== idx);
+                            setEditingService({ ...editingService, features: updated });
+                          }}
+                          className="text-rose-500 hover:text-rose-700 font-bold ml-1 cursor-pointer"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Add Feature Point Input */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      type="text"
+                      placeholder="e.g. Free 3-month plant replacement guarantee"
+                      value={newFeatureInput}
+                      onChange={(e) => setNewFeatureInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (newFeatureInput.trim()) {
+                            const current = editingService.features || [];
+                            setEditingService({
+                              ...editingService,
+                              features: [...current, newFeatureInput.trim()],
+                            });
+                            setNewFeatureInput('');
+                          }
+                        }
+                      }}
+                      className="flex-1 p-2 bg-white border border-[#1B3022]/20 rounded-xl text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newFeatureInput.trim()) {
+                          const current = editingService.features || [];
+                          setEditingService({
+                            ...editingService,
+                            features: [...current, newFeatureInput.trim()],
+                          });
+                          setNewFeatureInput('');
+                        }
+                      }}
+                      className="px-3 py-2 bg-[#2D4F36] hover:bg-[#1B3022] text-white rounded-xl font-bold text-xs cursor-pointer"
+                    >
+                      + Add
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t border-[#1B3022]/10">
+                <button
+                  type="button"
+                  onClick={() => setEditingService(null)}
+                  className="px-5 py-2.5 border border-[#1B3022]/20 rounded-full font-bold text-xs hover:bg-[#1B3022]/5 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white font-bold text-xs uppercase tracking-wider rounded-full shadow-md cursor-pointer transition-colors"
+                >
+                  Save Service
                 </button>
               </div>
             </form>

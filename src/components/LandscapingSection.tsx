@@ -12,23 +12,28 @@ import {
   HelpCircle,
   MessageCircle,
   Check,
-  Send
+  Send,
+  Sparkle
 } from 'lucide-react';
 
 interface LandscapingSectionProps {
   settings: WebsiteSettings;
-  onEnquireService: (service: LandscapingService) => void;
+  onEnquireService?: (service: LandscapingService) => void;
 }
 
 export const LandscapingSection: React.FC<LandscapingSectionProps> = ({
   settings,
-  onEnquireService,
 }) => {
   const [selectedServiceForModal, setSelectedServiceForModal] =
     useState<LandscapingService | null>(null);
   const [enquiryName, setEnquiryName] = useState('');
   const [enquiryPhone, setEnquiryPhone] = useState('');
   const [enquiryDetails, setEnquiryDetails] = useState('');
+
+  const servicesList: LandscapingService[] =
+    settings.services && settings.services.length > 0
+      ? settings.services
+      : INITIAL_SERVICES;
 
   const getIcon = (iconName: string) => {
     switch (iconName) {
@@ -78,22 +83,47 @@ Please schedule a consultation callback.`;
     <section id="landscaping" className="py-20 bg-[#F9F8F3]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <span className="text-[10px] uppercase tracking-[0.25em] font-extrabold text-[#2D4F36] opacity-80 block mb-2">
-            Professional Turnkey Services
+            {settings.landscapingTagline || 'Professional Turnkey Services'}
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#1B3022]">
-            Landscaping & Gardening Works
+            {settings.landscapingTitle || 'Landscaping & Gardening Works'}
           </h2>
           <div className="w-16 h-0.5 bg-[#2D4F36] mx-auto mt-4 mb-4"></div>
-          <p className="text-sm text-[#1B3022]/70 max-w-2xl mx-auto">
-            From residential terrace gardens and vertical green walls to commercial office biophilia and estate lawns, our landscape architects bring natural serenity to every space.
+          <p className="text-sm text-[#1B3022]/70 max-w-2xl mx-auto whitespace-pre-line">
+            {settings.landscapingDescription ||
+              'From residential terrace gardens and vertical green walls to commercial office biophilia and estate lawns, our landscape architects bring natural serenity to every space.'}
           </p>
         </div>
 
-        {/* 8 Services Grid */}
+        {/* Optional Section Showcase / Highlight Image */}
+        {settings.landscapingImage && (
+          <div className="mb-14 rounded-3xl overflow-hidden shadow-xl border border-[#1B3022]/10 relative group">
+            <div className="aspect-[21/9] sm:aspect-[24/9] w-full bg-[#1B3022]">
+              <img
+                src={settings.landscapingImage}
+                alt="Landscaping & Gardening Works Showcase"
+                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 opacity-90"
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 sm:p-10">
+              <div className="space-y-2 text-white">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-[#E3F2E6]">
+                  <Sparkle className="w-3 h-3 text-[#A7F3D0]" />
+                  <span>Custom Landscape Architecture & Execution</span>
+                </span>
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-[#F9F8F3]">
+                  {settings.landscapingTitle || 'Landscaping & Gardening Works'}
+                </h3>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {INITIAL_SERVICES.map((service) => (
+          {servicesList.map((service) => (
             <div
               key={service.id}
               className="bg-white rounded-3xl border border-[#1B3022]/10 overflow-hidden shadow-sm hover:shadow-xl hover:border-[#2D4F36]/30 transition-all duration-300 flex flex-col justify-between group"
@@ -166,7 +196,7 @@ Please schedule a consultation callback.`;
               </div>
               <button
                 onClick={() => setSelectedServiceForModal(null)}
-                className="p-2 hover:bg-[#1B3022]/10 rounded-full"
+                className="p-2 hover:bg-[#1B3022]/10 rounded-full text-[#1B3022] cursor-pointer"
               >
                 &times;
               </button>
