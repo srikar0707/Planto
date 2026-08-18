@@ -243,9 +243,19 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         {filteredProducts.length === 0 ? (
           <div className="text-center py-20 bg-[#F1EFE7] rounded-3xl border border-[#1B3022]/10 p-8">
             <AlertCircle className="w-12 h-12 text-[#2D4F36] mx-auto mb-4 opacity-50" />
-            <h3 className="text-xl font-serif font-bold text-[#1B3022] mb-2">No plants found</h3>
+            <h3 className="text-xl font-serif font-bold text-[#1B3022] mb-2">
+              {searchQuery
+                ? `No products found for "${searchQuery}"`
+                : selectedCategory !== 'All'
+                ? `No products in ${selectedCategory} yet`
+                : 'No products found'}
+            </h3>
             <p className="text-sm text-[#1B3022]/60 max-w-md mx-auto mb-6">
-              We couldn't find any products matching your search query &quot;{searchQuery}&quot;.
+              {searchQuery
+                ? `We couldn't find any products matching "${searchQuery}". Try searching with another name or keyword.`
+                : selectedCategory !== 'All'
+                ? `We are currently updating our stock for ${selectedCategory}. Explore other categories or view all products.`
+                : 'No products match your current filter selections. Try resetting filters to explore our full nursery catalog.'}
             </p>
             <button
               onClick={() => {
@@ -253,7 +263,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                 onSelectCategory('All');
                 setSelectedDifficulty('All');
               }}
-              className="px-6 py-2.5 bg-[#2D4F36] text-white text-xs font-bold uppercase tracking-wider rounded-full hover:bg-[#1B3022] transition-colors"
+              className="px-6 py-2.5 bg-[#2D4F36] text-white text-xs font-bold uppercase tracking-wider rounded-full hover:bg-[#1B3022] transition-colors cursor-pointer shadow-md"
             >
               Reset All Filters
             </button>
