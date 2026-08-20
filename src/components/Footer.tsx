@@ -75,6 +75,10 @@ export const Footer: React.FC<FooterProps> = ({ settings, onSelectCategory }) =>
                 <MessageCircle className="w-4 h-4 fill-current" />
               </a>
             </div>
+
+            <p className="text-xs text-white/60 font-medium tracking-wide">
+              Developed by K.Srikar and V.Manikanta
+            </p>
           </div>
 
           {/* Quick Links */}
