@@ -94,9 +94,9 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
   const handleCategorySelect = (categoryName: string) => {
     onSelectCategory(categoryName);
-    // Smooth scroll to catalog view
+    // Smooth scroll downward to the catalog items/products section
     setTimeout(() => {
-      const el = document.getElementById('products');
+      const el = document.getElementById('catalog-items-section');
       if (el) {
         const headerOffset = 80;
         const elementPosition = el.getBoundingClientRect().top;
@@ -149,17 +149,13 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             {/* "All Collection" Circular Card */}
             <div
               onClick={() => handleCategorySelect('All')}
-              className={`group flex flex-col items-center justify-center p-3 rounded-2xl transition-all cursor-pointer ${
-                selectedCategory === 'All'
-                  ? 'bg-white shadow-md border border-[#2D4F36]/30'
-                  : 'bg-white/60 hover:bg-white border border-[#1B3022]/10 hover:shadow-sm'
-              }`}
+              className="group flex flex-col items-center justify-center transition-all cursor-pointer"
             >
               <div
                 className={`relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full overflow-hidden transition-all duration-300 ${
                   selectedCategory === 'All'
-                    ? 'ring-4 ring-[#2D4F36] ring-offset-2 shadow-md'
-                    : 'group-hover:scale-105 border-2 border-[#1B3022]/15'
+                    ? 'ring-4 ring-[#2D4F36] ring-offset-2 shadow-md scale-105'
+                    : 'group-hover:scale-105 border-2 border-[#1B3022]/15 shadow-sm'
                 }`}
               >
                 <img
@@ -174,14 +170,11 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               <span
                 className={`text-xs sm:text-sm font-serif font-bold text-center mt-2.5 transition-colors line-clamp-1 ${
                   selectedCategory === 'All'
-                    ? 'text-[#2D4F36]'
+                    ? 'text-[#2D4F36] font-extrabold'
                     : 'text-[#1B3022] group-hover:text-[#2D4F36]'
                 }`}
               >
                 All Collection
-              </span>
-              <span className="text-[10px] text-[#1B3022]/50 font-medium">
-                {products.length} items
               </span>
             </div>
 
@@ -189,25 +182,18 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             {categoriesList.map((cat) => {
               const isSelected =
                 selectedCategory.toLowerCase() === cat.name.toLowerCase();
-              const categoryCount = products.filter(
-                (p) => p.category.toLowerCase() === cat.name.toLowerCase()
-              ).length;
 
               return (
                 <div
                   key={cat.id}
                   onClick={() => handleCategorySelect(cat.name)}
-                  className={`group flex flex-col items-center justify-center p-3 rounded-2xl transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-white shadow-md border border-[#2D4F36]/30'
-                      : 'bg-white/60 hover:bg-white border border-[#1B3022]/10 hover:shadow-sm'
-                  }`}
+                  className="group flex flex-col items-center justify-center transition-all cursor-pointer"
                 >
                   <div
                     className={`relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full overflow-hidden transition-all duration-300 ${
                       isSelected
-                        ? 'ring-4 ring-[#2D4F36] ring-offset-2 shadow-md'
-                        : 'group-hover:scale-105 border-2 border-[#1B3022]/15'
+                        ? 'ring-4 ring-[#2D4F36] ring-offset-2 shadow-md scale-105'
+                        : 'group-hover:scale-105 border-2 border-[#1B3022]/15 shadow-sm'
                     }`}
                   >
                     <img
@@ -227,14 +213,11 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   <span
                     className={`text-xs sm:text-sm font-serif font-bold text-center mt-2.5 transition-colors line-clamp-1 ${
                       isSelected
-                        ? 'text-[#2D4F36]'
+                        ? 'text-[#2D4F36] font-extrabold'
                         : 'text-[#1B3022] group-hover:text-[#2D4F36]'
                     }`}
                   >
                     {cat.name}
-                  </span>
-                  <span className="text-[10px] text-[#1B3022]/50 font-medium">
-                    {categoryCount} {categoryCount === 1 ? 'item' : 'items'}
                   </span>
                 </div>
               );
@@ -242,12 +225,14 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
           </div>
         </div>
 
-        {/* 2. DEDICATED CATEGORY PAGE BANNER (When a Category is Selected) */}
-        {selectedCategory !== 'All' && (
-          <div className="bg-white p-5 sm:p-7 rounded-3xl border border-[#1B3022]/10 shadow-sm mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              {activeCategoryObj?.image && (
-                <img
+        {/* PRODUCTS & CATALOG ITEMS CONTAINER */}
+        <div id="catalog-items-section" className="scroll-mt-20">
+          {/* 2. DEDICATED CATEGORY PAGE BANNER (When a Category is Selected) */}
+          {selectedCategory !== 'All' && (
+            <div className="bg-white p-5 sm:p-7 rounded-3xl border border-[#1B3022]/10 shadow-sm mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-4">
+                {activeCategoryObj?.image && (
+                  <img
                   src={activeCategoryObj.image}
                   alt={selectedCategory}
                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-[#2D4F36] shrink-0 shadow-sm"
@@ -463,6 +448,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             ))}
           </div>
         )}
+        </div>
       </div>
     </section>
   );

@@ -24,17 +24,42 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectCategory,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const lastScrollYRef = React.useRef(0);
+  const mobileMenuOpenRef = React.useRef(mobileMenuOpen);
+
+  useEffect(() => {
+    mobileMenuOpenRef.current = mobileMenuOpen;
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 40) {
-        setIsScrolled(true);
-      } else {
+      const currentScrollY = window.scrollY;
+      const prevScrollY = lastScrollYRef.current;
+
+      // When near the top of the page, header is always visible
+      if (currentScrollY <= 40) {
+        setIsVisible(true);
         setIsScrolled(false);
+      } else {
+        setIsScrolled(true);
+
+        // Hide on scroll down, reveal on scroll up if mobile menu is closed
+        if (!mobileMenuOpenRef.current) {
+          if (currentScrollY > prevScrollY && currentScrollY - prevScrollY > 6) {
+            setIsVisible(false);
+          } else if (currentScrollY < prevScrollY && prevScrollY - currentScrollY > 6) {
+            setIsVisible(true);
+          }
+        }
       }
+
+      lastScrollYRef.current = currentScrollY;
     };
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -53,13 +78,16 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleNavClick = (link: { href: string; category?: string }) => {
     setMobileMenuOpen(false);
+    setIsVisible(true);
     if (link.category) {
       onSelectCategory(link.category);
     }
     setTimeout(() => {
-      const element = document.querySelector(link.href);
+      const element = link.category
+        ? document.querySelector('#catalog-items-section') || document.querySelector(link.href)
+        : document.querySelector(link.href);
       if (element) {
-        const headerOffset = 90;
+        const headerOffset = 80;
         const elementPosition = element.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
         window.scrollTo({
@@ -71,7 +99,11 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full transition-all duration-300">
+    <header
+      className={`sticky top-0 z-40 w-full transition-transform duration-300 ease-in-out ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
       {/* Top Banner */}
       <div className="bg-[#1B3022] text-[#F9F8F3] text-xs py-1.5 px-4 text-center flex items-center justify-between font-medium">
         <div className="hidden md:flex items-center space-x-2 text-[11px] opacity-80">
