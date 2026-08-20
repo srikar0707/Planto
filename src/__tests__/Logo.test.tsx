@@ -4,7 +4,7 @@ import { Logo } from '../components/Logo';
 
 describe('Logo Component', () => {
   it('renders uploaded custom image logo when customLogoUrl is provided', () => {
-    const testUrl = 'https://netaqfodhssuzssqdqhu.supabase.co/storage/v1/object/public/product-images/logo.png';
+    const testUrl = '/storage/product-images/logo.png';
     render(<Logo customLogoUrl={testUrl} size="md" />);
     const img = screen.getByRole('img');
     expect(img).toBeInTheDocument();

@@ -59,7 +59,7 @@ describe('Store & Initial Data Integrity', () => {
 
   it('normalizes private Supabase storage URLs to clean relative /storage/ proxy paths', () => {
     const rawSupabaseUrl =
-      'https://netaqfodhssuzssqdqhu.supabase.co/storage/v1/object/public/product-images/products/monstera-123.jpg';
+      'https://mock-project-id.supabase.co/storage/v1/object/public/product-images/products/monstera-123.jpg';
     const normalized = normalizeImageUrl(rawSupabaseUrl);
     expect(normalized).toBe('/storage/product-images/products/monstera-123.jpg');
     expect(normalized).not.toContain('supabase.co');

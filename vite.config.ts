@@ -2,9 +2,12 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  const supabaseUrl = env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+
   return {
     plugins: [react(), tailwindcss()],
     resolve: {
@@ -18,13 +21,15 @@ export default defineConfig(() => {
       setupFiles: './src/test/setup.ts',
     },
     server: {
-      proxy: {
-        '/storage': {
-          target: 'https://netaqfodhssuzssqdqhu.supabase.co/storage/v1/object/public',
-          changeOrigin: true,
-          rewrite: (p) => p.replace(/^\/storage/, ''),
-        },
-      },
+      proxy: supabaseUrl
+        ? {
+            '/storage': {
+              target: `${supabaseUrl}/storage/v1/object/public`,
+              changeOrigin: true,
+              rewrite: (p) => p.replace(/^\/storage/, ''),
+            },
+          }
+        : {},
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

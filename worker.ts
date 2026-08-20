@@ -12,8 +12,12 @@ export default {
     // Proxy Supabase storage requests seamlessly through custom domain
     if (url.pathname.startsWith('/storage/')) {
       const subpath = url.pathname.replace(/^\/storage\//, '');
-      const supabaseUrl =
-        env?.VITE_SUPABASE_URL || 'https://netaqfodhssuzssqdqhu.supabase.co';
+      const supabaseUrl = env?.VITE_SUPABASE_URL;
+
+      if (!supabaseUrl) {
+        return new Response('Storage URL is not configured.', { status: 500 });
+      }
+
       const targetUrl = `${supabaseUrl}/storage/v1/object/public/${subpath}`;
 
       try {
