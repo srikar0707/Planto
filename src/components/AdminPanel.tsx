@@ -680,7 +680,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <th className="p-3.5">Product</th>
                             <th className="p-3.5">Category</th>
                             <th className="p-3.5">Price</th>
-                            <th className="p-3.5">Care</th>
                             <th className="p-3.5">Status</th>
                             <th className="p-3.5 text-right">Actions</th>
                           </tr>
@@ -703,11 +702,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               </td>
                               <td className="p-3.5 text-[#1B3022]/80">{p.category}</td>
                               <td className="p-3.5 font-bold text-[#2D4F36]">₹{p.price}</td>
-                              <td className="p-3.5">
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F1EFE7] text-[#1B3022]">
-                                  {p.careDifficulty}
-                                </span>
-                              </td>
                               <td className="p-3.5">
                                 <span
                                   className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${

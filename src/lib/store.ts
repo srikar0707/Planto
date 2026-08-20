@@ -16,8 +16,11 @@ export const store = {
     ]);
     if (products.error) throw products.error;
     if (categories.error) throw categories.error;
-    if (settings.error) throw settings.error;
-    return { products: products.data.map(toProduct), categories: categories.data.map(toCategory), settings: settings.data?.value as WebsiteSettings | null };
+    return {
+      products: products.data.map(toProduct),
+      categories: categories.data.map(toCategory),
+      settings: normalizeSettings(settings.data?.value as WebsiteSettings | null),
+    };
   },
 
   async saveProduct(product: Product) {
@@ -64,13 +67,32 @@ export const store = {
     const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     const path = `products/${crypto.randomUUID()}.${extension}`;
     const { error } = await client().storage.from('product-images').upload(path, file, { upsert: false, contentType: file.type, cacheControl: '31536000' });
-    if (error) throw error;
-    return client().storage.from('product-images').getPublicUrl(path).data.publicUrl;
+    return `/storage/product-images/${path}`;
   },
 };
 
+export const normalizeImageUrl = (url: string): string => {
+  if (!url || typeof url !== 'string') return '';
+  return url.replace(/^https:\/\/[a-z0-9-]+\.supabase\.co\/storage\/v1\/object\/public\//i, '/storage/');
+};
+
+const normalizeSettings = (settings: WebsiteSettings | null): WebsiteSettings | null => {
+  if (!settings) return null;
+  return {
+    ...settings,
+    logoUrl: normalizeImageUrl(settings.logoUrl),
+    aboutUsImage: settings.aboutUsImage ? normalizeImageUrl(settings.aboutUsImage) : settings.aboutUsImage,
+    landscapingImage: settings.landscapingImage ? normalizeImageUrl(settings.landscapingImage) : settings.landscapingImage,
+    services: settings.services?.map((s) => ({
+      ...s,
+      image: normalizeImageUrl(s.image),
+    })),
+  };
+};
+
 const toProduct = (row: any): Product => ({
-  id: row.id, name: row.name, category: row.category, price: Number(row.price), images: row.images ?? [],
+  id: row.id, name: row.name, category: row.category, price: Number(row.price),
+  images: Array.isArray(row.images) ? row.images.map(normalizeImageUrl) : [],
   shortDescription: row.short_description, description: row.description, careDifficulty: row.care_difficulty,
   availability: row.availability, uses: row.uses, growingConditions: row.growing_conditions, sunlight: row.sunlight,
   watering: row.watering, soilType: row.soil_type, fertilizer: row.fertilizer, growthTips: row.growth_tips,
@@ -85,4 +107,10 @@ const productToRow = (p: Product) => ({
   suitable_climate: p.suitableClimate, plant_size: p.plantSize, featured: p.featured ?? false,
   rating: p.rating ?? null, reviews_count: p.reviewsCount ?? null, is_active: p.availability !== 'Out of Stock',
 });
-const toCategory = (row: any): Category => ({ id: row.id, name: row.name, group: row.group_name, description: row.description, image: row.image_url });
+const toCategory = (row: any): Category => ({
+  id: row.id,
+  name: row.name,
+  group: row.group_name,
+  description: row.description,
+  image: normalizeImageUrl(row.image_url),
+});

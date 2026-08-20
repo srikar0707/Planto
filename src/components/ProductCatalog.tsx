@@ -23,10 +23,9 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   searchQuery,
   setSearchQuery,
 }) => {
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('All');
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high' | 'rating'>('featured');
 
-  // Filter products by category, search query, difficulty
+  // Filter products by category and search query
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       // Category match
@@ -48,12 +47,6 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         }
       }
 
-      // Difficulty match
-      let matchesDifficulty = true;
-      if (selectedDifficulty !== 'All') {
-        matchesDifficulty = product.careDifficulty === selectedDifficulty;
-      }
-
       // Search match
       let matchesSearch = true;
       if (searchQuery.trim().length > 0) {
@@ -65,14 +58,14 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
           product.uses.toLowerCase().includes(query);
       }
 
-      return matchesCategory && matchesDifficulty && matchesSearch;
+      return matchesCategory && matchesSearch;
     }).sort((a, b) => {
       if (sortBy === 'price-low') return a.price - b.price;
       if (sortBy === 'price-high') return b.price - a.price;
       if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
       return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
     });
-  }, [products, selectedCategory, selectedDifficulty, searchQuery, sortBy]);
+  }, [products, selectedCategory, searchQuery, sortBy]);
 
   const plantSubcategories = [
     'Indoor Plants',
@@ -187,23 +180,6 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               />
             </div>
 
-            {/* Care Difficulty Filter */}
-            <div className="flex items-center space-x-2">
-              <span className="text-[11px] uppercase tracking-wider font-bold text-[#1B3022]/70">
-                Care Level:
-              </span>
-              <select
-                value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="bg-white px-3 py-2 rounded-xl text-xs font-medium text-[#1B3022] border border-[#1B3022]/15 focus:outline-none"
-              >
-                <option value="All">All Care Levels</option>
-                <option value="Easy">Easy Care 🟢</option>
-                <option value="Moderate">Moderate 🟡</option>
-                <option value="Expert">Expert 🔴</option>
-              </select>
-            </div>
-
             {/* Sorting Filter */}
             <div className="flex items-center space-x-2">
               <span className="text-[11px] uppercase tracking-wider font-bold text-[#1B3022]/70">
@@ -261,7 +237,6 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               onClick={() => {
                 setSearchQuery('');
                 onSelectCategory('All');
-                setSelectedDifficulty('All');
               }}
               className="px-6 py-2.5 bg-[#2D4F36] text-white text-xs font-bold uppercase tracking-wider rounded-full hover:bg-[#1B3022] transition-colors cursor-pointer shadow-md"
             >
@@ -295,17 +270,6 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                         <span>Bestseller</span>
                       </span>
                     )}
-                    <span
-                      className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full shadow-sm ${
-                        product.careDifficulty === 'Easy'
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                          : product.careDifficulty === 'Moderate'
-                          ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                          : 'bg-rose-100 text-rose-800 border border-rose-300'
-                      }`}
-                    >
-                      {product.careDifficulty} Care
-                    </span>
                   </div>
 
                   {/* Availability Badge */}

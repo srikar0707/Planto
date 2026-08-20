@@ -25,7 +25,7 @@ export const INITIAL_SETTINGS: WebsiteSettings = {
   contactEmail: "care@planto.in",
   contactAddress: "Plant'O Nursery, Rajahmundry, Andhra Pradesh 533126",
   workingHours: "Monday - Sunday: 8:00 AM - 8:00 PM",
-  instagramUrl: "https://instagram.com/plantonursery",
+  instagramUrl: "https://instagram.com/plant_o_nursery",
   facebookUrl: "https://facebook.com/plantonursery",
   landscapingTagline: "Professional Turnkey Services",
   landscapingTitle: "Landscaping & Gardening Works",
@@ -42,7 +42,7 @@ export const INITIAL_CATEGORIES: Category[] = [
   { id: 'cat-bonsai', name: 'Bonsai Plants', group: 'Plants', description: 'Miniature artfully trained trees with timeless elegance', image: 'https://images.unsplash.com/photo-1512428813834-c702c7702b78?auto=format&fit=crop&w=600&q=80' },
   { id: 'cat-gift', name: 'Gift Plants', group: 'Plants', description: 'Good luck & decorative living gifts for festive occasions', image: 'https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=600&q=80' },
   { id: 'cat-cactus', name: 'Cactus Plants', group: 'Plants', description: 'Low maintenance drought-tolerant succulents & desert cacti', image: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=600&q=80' },
-  
+
   // Other Categories
   { id: 'cat-accessories', name: 'Accessories', group: 'Other', description: 'Gardening tools, sprayers, gloves, pruners & stands', image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=600&q=80' },
   { id: 'cat-pots', name: 'Pots', group: 'Other', description: 'Ceramic, terracotta, plastic & hanging plantholder containers', image: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=600&q=80' },

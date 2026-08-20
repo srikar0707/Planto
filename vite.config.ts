@@ -18,6 +18,13 @@ export default defineConfig(() => {
       setupFiles: './src/test/setup.ts',
     },
     server: {
+      proxy: {
+        '/storage': {
+          target: 'https://netaqfodhssuzssqdqhu.supabase.co/storage/v1/object/public',
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/storage/, ''),
+        },
+      },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

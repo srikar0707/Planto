@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { store } from '../lib/store';
+import { store, normalizeImageUrl } from '../lib/store';
 import { INITIAL_SETTINGS, INITIAL_CATEGORIES, INITIAL_PRODUCTS } from '../data/initialData';
 
 describe('Store & Initial Data Integrity', () => {
@@ -40,5 +40,21 @@ describe('Store & Initial Data Integrity', () => {
 
     const orderId = await store.createOrder(mockOrder);
     expect(orderId).toMatch(/^PLN-[A-Z0-9]{8}$/);
+  });
+
+  it('normalizes private Supabase storage URLs to clean relative /storage/ proxy paths', () => {
+    const rawSupabaseUrl =
+      'https://netaqfodhssuzssqdqhu.supabase.co/storage/v1/object/public/product-images/products/monstera-123.jpg';
+    const normalized = normalizeImageUrl(rawSupabaseUrl);
+    expect(normalized).toBe('/storage/product-images/products/monstera-123.jpg');
+    expect(normalized).not.toContain('supabase.co');
+
+    // Leaves standard external URLs and relative URLs untouched
+    expect(normalizeImageUrl('https://images.unsplash.com/photo-123')).toBe(
+      'https://images.unsplash.com/photo-123'
+    );
+    expect(normalizeImageUrl('/storage/product-images/products/test.png')).toBe(
+      '/storage/product-images/products/test.png'
+    );
   });
 });

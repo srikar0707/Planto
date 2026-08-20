@@ -121,8 +121,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 <div className="flex items-center space-x-2">
                   <Layers className="w-4 h-4 text-emerald-700 shrink-0" />
                   <div>
-                    <span className="opacity-60 block text-[10px]">Maintenance</span>
-                    <span className="font-semibold">{product.maintenanceLevel} Level</span>
+                    <span className="opacity-60 block text-[10px]">Climate</span>
+                    <span className="font-semibold line-clamp-1">{product.suitableClimate}</span>
                   </div>
                 </div>
 
@@ -262,13 +262,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   Suitable Climate
                 </span>
                 <p className="text-[#1B3022]/80 leading-relaxed">{product.suitableClimate}</p>
-              </div>
-
-              <div className="bg-white p-4 rounded-xl border border-[#1B3022]/10 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#2D4F36] block">
-                  Care Difficulty
-                </span>
-                <p className="text-[#1B3022]/80 font-bold">{product.careDifficulty} Level</p>
               </div>
 
               <div className="bg-white p-4 rounded-xl border border-[#1B3022]/10 space-y-1">
