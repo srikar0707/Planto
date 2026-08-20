@@ -1,4 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+vi.mock('../lib/supabase', () => ({
+  supabase: {
+    from: () => ({
+      insert: vi.fn().mockResolvedValue({ data: null, error: null }),
+      select: () => ({
+        eq: () => ({
+          order: vi.fn().mockResolvedValue({ data: [], error: null }),
+          maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+        }),
+      }),
+    }),
+  },
+}));
+
 import { store, normalizeImageUrl } from '../lib/store';
 import { INITIAL_SETTINGS, INITIAL_CATEGORIES, INITIAL_PRODUCTS } from '../data/initialData';
 

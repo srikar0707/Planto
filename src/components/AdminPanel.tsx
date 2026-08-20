@@ -1556,6 +1556,43 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       </div>
                     </div>
 
+                    {/* Social Media & Profiles */}
+                    <div className="bg-white p-6 rounded-3xl border border-[#1B3022]/10 shadow-sm space-y-4">
+                      <h4 className="text-sm font-serif font-bold text-[#2D4F36] pb-2 border-b border-[#1B3022]/10">
+                        Social Media & Profiles
+                      </h4>
+
+                      <div>
+                        <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                          Instagram Profile Link
+                        </label>
+                        <input
+                          type="url"
+                          placeholder="https://instagram.com/plant_o_nursery"
+                          value={settingsForm.instagramUrl || ''}
+                          onChange={(e) =>
+                            setSettingsForm({ ...settingsForm, instagramUrl: e.target.value })
+                          }
+                          className="w-full bg-[#F9F8F3] p-2.5 rounded-xl border border-[#1B3022]/15 focus:outline-none focus:border-[#2D4F36]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                          Facebook Page Link
+                        </label>
+                        <input
+                          type="url"
+                          placeholder="https://facebook.com/plantonursery"
+                          value={settingsForm.facebookUrl || ''}
+                          onChange={(e) =>
+                            setSettingsForm({ ...settingsForm, facebookUrl: e.target.value })
+                          }
+                          className="w-full bg-[#F9F8F3] p-2.5 rounded-xl border border-[#1B3022]/15 focus:outline-none focus:border-[#2D4F36]"
+                        />
+                      </div>
+                    </div>
+
                     {/* Branding & Logo */}
                     <div className="bg-white p-6 rounded-3xl border border-[#1B3022]/10 shadow-sm space-y-4">
                       <h4 className="text-sm font-serif font-bold text-[#2D4F36] pb-2 border-b border-[#1B3022]/10">

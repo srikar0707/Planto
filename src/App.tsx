@@ -80,9 +80,10 @@ export default function App() {
         setProducts(data.products);
         setCategories(data.categories);
         if (data.settings) {
-          setSettings(data.settings);
+          const merged = { ...INITIAL_SETTINGS, ...data.settings };
+          setSettings(merged);
           try {
-            localStorage.setItem('planto_settings', JSON.stringify(data.settings));
+            localStorage.setItem('planto_settings', JSON.stringify(merged));
           } catch {
             // ignore
           }

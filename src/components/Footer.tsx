@@ -46,20 +46,20 @@ export const Footer: React.FC<FooterProps> = ({ settings, onSelectCategory }) =>
 
             <div className="pt-2 flex items-center space-x-3">
               <a
-                href={settings.instagramUrl}
+                href={settings.instagramUrl || 'https://instagram.com/plant_o_nursery'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-white/10 hover:bg-[#2D4F36] rounded-full transition-colors"
+                className="p-2 bg-white/10 hover:bg-[#2D4F36] rounded-full transition-colors cursor-pointer"
                 title="Instagram"
               >
                 <Instagram className="w-4 h-4" />
               </a>
 
               <a
-                href={settings.facebookUrl}
+                href={settings.facebookUrl || 'https://facebook.com/plantonursery'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 bg-white/10 hover:bg-[#2D4F36] rounded-full transition-colors"
+                className="p-2 bg-white/10 hover:bg-[#2D4F36] rounded-full transition-colors cursor-pointer"
                 title="Facebook"
               >
                 <Facebook className="w-4 h-4" />
