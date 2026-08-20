@@ -1152,7 +1152,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                         <div>
                           <input
-                            type="url"
+                            type="text"
                             placeholder="Or paste an image web URL (https://...)"
                             value={settingsForm.landscapingImage || ''}
                             onChange={(e) =>
@@ -1582,7 +1582,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           </label>
 
                           <input
-                            type="url"
+                            type="text"
                             placeholder="Or paste image web link (https://...)"
                             value={settingsForm.aboutUsImage || ''}
                             onChange={(e) =>
@@ -1919,7 +1919,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           Instagram Profile Link
                         </label>
                         <input
-                          type="url"
+                          type="text"
                           placeholder="https://instagram.com/plant_o_nursery"
                           value={settingsForm.instagramUrl || ''}
                           onChange={(e) =>
@@ -1934,7 +1934,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           Facebook Page Link
                         </label>
                         <input
-                          type="url"
+                          type="text"
                           placeholder="https://facebook.com/plantonursery"
                           value={settingsForm.facebookUrl || ''}
                           onChange={(e) =>
@@ -2195,8 +2195,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         Or Paste Image URL
                       </label>
                       <input
-                        type="url"
-                        placeholder="https://..."
+                        type="text"
+                        placeholder="https://... or /storage/..."
                         value={editingProduct.images?.[0] || ''}
                         onChange={(e) => setEditingProduct({ ...editingProduct, images: [e.target.value] })}
                         className="w-full p-2.5 bg-white border rounded-xl text-xs"
@@ -2321,8 +2321,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       />
                     </label>
                     <input
-                      type="url"
-                      placeholder="Or enter image URL (https://...)"
+                      type="text"
+                      placeholder="Or enter image URL (https://... or /storage/...)"
                       value={editingCategory.image || ''}
                       onChange={(e) =>
                         setEditingCategory({ ...editingCategory, image: e.target.value })
@@ -2488,8 +2488,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                     <div>
                       <input
-                        type="url"
-                        placeholder="Or paste image URL (https://...)"
+                        type="text"
+                        placeholder="Or paste image URL (https://... or /storage/...)"
                         value={editingService.image || ''}
                         onChange={(e) =>
                           setEditingService({ ...editingService, image: e.target.value })
@@ -2771,8 +2771,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       />
                     </label>
                     <input
-                      type="url"
-                      placeholder="Or enter image URL (https://...)"
+                      type="text"
+                      placeholder="Or enter image URL (https://... or /storage/...)"
                       value={editingProject.imageUrl || ''}
                       onChange={(e) =>
                         setEditingProject({ ...editingProject, imageUrl: e.target.value })
