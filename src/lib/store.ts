@@ -87,6 +87,10 @@ const normalizeSettings = (settings: WebsiteSettings | null): WebsiteSettings | 
       ...s,
       image: normalizeImageUrl(s.image),
     })),
+    completedProjects: settings.completedProjects?.map((p) => ({
+      ...p,
+      imageUrl: normalizeImageUrl(p.imageUrl),
+    })),
   };
 };
 

@@ -15,7 +15,12 @@ vi.mock('../lib/supabase', () => ({
 }));
 
 import { store, normalizeImageUrl } from '../lib/store';
-import { INITIAL_SETTINGS, INITIAL_CATEGORIES, INITIAL_PRODUCTS } from '../data/initialData';
+import {
+  INITIAL_SETTINGS,
+  INITIAL_CATEGORIES,
+  INITIAL_PRODUCTS,
+  INITIAL_COMPLETED_PROJECTS,
+} from '../data/initialData';
 
 describe('Store & Initial Data Integrity', () => {
   it('contains valid default nursery website settings', () => {
@@ -23,6 +28,17 @@ describe('Store & Initial Data Integrity', () => {
     expect(INITIAL_SETTINGS.whatsAppNumber).toBeTruthy();
     expect(INITIAL_SETTINGS.contactPhone).toBeTruthy();
     expect(INITIAL_SETTINGS.contactEmail).toContain('@');
+    expect(INITIAL_SETTINGS.completedProjectsTitle).toBe('Our Completed Projects');
+  });
+
+  it('contains valid initial completed projects showcase', () => {
+    expect(INITIAL_COMPLETED_PROJECTS.length).toBeGreaterThanOrEqual(4);
+    INITIAL_COMPLETED_PROJECTS.forEach((proj) => {
+      expect(proj.id).toBeTruthy();
+      expect(proj.title).toBeTruthy();
+      expect(proj.category).toBeTruthy();
+      expect(proj.imageUrl).toBeTruthy();
+    });
   });
 
   it('contains valid initial categories', () => {

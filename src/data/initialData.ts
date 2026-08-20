@@ -1,4 +1,4 @@
-import { Product, Category, LandscapingService, WebsiteSettings } from '../types';
+import { Product, Category, LandscapingService, CompletedProject, WebsiteSettings } from '../types';
 
 export const INITIAL_SETTINGS: WebsiteSettings = {
   companyName: "PlantO Nursery Gardens",
@@ -31,6 +31,8 @@ export const INITIAL_SETTINGS: WebsiteSettings = {
   landscapingTitle: "Landscaping & Gardening Works",
   landscapingDescription: "From residential terrace gardens and vertical green walls to commercial office biophilia and estate lawns, our landscape architects bring natural serenity to every space.",
   landscapingImage: "https://images.unsplash.com/photo-1558904541-efa8c196b27d?auto=format&fit=crop&w=1600&q=80",
+  completedProjectsTitle: "Our Completed Projects",
+  completedProjectsSubtitle: "Real Transformations by PlantO Landscape Architects",
 };
 
 export const INITIAL_CATEGORIES: Category[] = [
@@ -524,5 +526,56 @@ export const INITIAL_SERVICES: LandscapingService[] = [
     iconName: 'HelpCircle',
     image: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80',
     features: ['In-person or virtual consultation', 'Plant health diagnosis & cure roadmap', '3D garden design rendering optional', 'Personalized fertilizer recipe']
+  }
+];
+
+export const INITIAL_COMPLETED_PROJECTS: CompletedProject[] = [
+  {
+    id: 'proj-1',
+    title: 'Luxury Villa Japanese Zen Garden',
+    category: 'Villa Landscaping',
+    location: 'Rajahmundry, AP',
+    imageUrl: 'https://images.unsplash.com/photo-1558904541-efa8c196b27d?auto=format&fit=crop&w=1200&q=80',
+    description: 'Custom rock garden with manicured bonsai specimens, natural stone pathways, and automated subsurface micro-irrigation for a private estate.'
+  },
+  {
+    id: 'proj-2',
+    title: 'Commercial IT Park Vertical Bio-Wall',
+    category: 'Vertical Gardens',
+    location: 'Madhapur, Hyderabad',
+    imageUrl: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=1200&q=80',
+    description: '3,500 sq ft bio-wall with over 12,000 air-purifying indoor plants, automated drip fertigation, and mood lighting.'
+  },
+  {
+    id: 'proj-3',
+    title: 'Penthouse Skyline Terrace Garden',
+    category: 'Terrace Gardens',
+    location: 'Kakinada, AP',
+    imageUrl: 'https://images.unsplash.com/photo-1598902108854-10e335adac99?auto=format&fit=crop&w=1200&q=80',
+    description: 'Turnkey rooftop oasis with weather-resistant pergola, architectural pots, mood spotlights, and blooming perennials.'
+  },
+  {
+    id: 'proj-4',
+    title: 'Resort Lawn & Avenue Tree Masterplan',
+    category: 'Resort & Estate',
+    location: 'Visakhapatnam, AP',
+    imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80',
+    description: '15 acres of lush Bermuda hybrid lawn with perimeter Royal Palms, flowering bougainvillea arches, and natural walkways.'
+  },
+  {
+    id: 'proj-5',
+    title: 'Boutique Hotel Atrium Biophilia',
+    category: 'Indoor Biophilia',
+    location: 'Vijayawada, AP',
+    imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
+    description: 'Multi-level atrium green installation with architectural Ficus lyrata trees and hanging trailing creepers.'
+  },
+  {
+    id: 'proj-6',
+    title: 'Eco Farmhouse Organic Orchard & Landscape',
+    category: 'Farm Landscaping',
+    location: 'East Godavari, AP',
+    imageUrl: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1200&q=80',
+    description: 'Integrated landscape design combining exotic grafted fruit trees, native herbal beds, and natural stone water bodies.'
   }
 ];

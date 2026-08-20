@@ -45,6 +45,15 @@ export interface LandscapingService {
   features: string[];
 }
 
+export interface CompletedProject {
+  id: string;
+  title: string;
+  category: string;
+  location?: string;
+  imageUrl: string;
+  description?: string;
+}
+
 export interface WebsiteSettings {
   companyName: string;
   whatsAppNumber: string;
@@ -72,6 +81,9 @@ export interface WebsiteSettings {
   landscapingDescription?: string;
   landscapingImage?: string;
   services?: LandscapingService[];
+  completedProjectsTitle?: string;
+  completedProjectsSubtitle?: string;
+  completedProjects?: CompletedProject[];
 }
 
 export interface OrderRecord {

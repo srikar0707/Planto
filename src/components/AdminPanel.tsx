@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Product, Category, WebsiteSettings, LandscapingService } from '../types';
+import { Product, Category, WebsiteSettings, LandscapingService, CompletedProject } from '../types';
 import { store } from '../lib/store';
-import { INITIAL_SERVICES } from '../data/initialData';
+import { INITIAL_SERVICES, INITIAL_COMPLETED_PROJECTS } from '../data/initialData';
 import {
   Shield,
   X,
@@ -30,7 +30,11 @@ import {
   HelpCircle,
   Loader2,
   Check,
-  HeartHandshake
+  HeartHandshake,
+  ArrowUp,
+  ArrowDown,
+  MapPin,
+  Sparkle
 } from 'lucide-react';
 
 interface AdminPanelProps {
@@ -89,6 +93,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [editingService, setEditingService] = useState<Partial<LandscapingService> | null>(null);
   const [newFeatureInput, setNewFeatureInput] = useState('');
 
+  // Completed Projects list state
+  const [completedProjectsList, setCompletedProjectsList] = useState<CompletedProject[]>(
+    settings.completedProjects && settings.completedProjects.length > 0
+      ? settings.completedProjects
+      : INITIAL_COMPLETED_PROJECTS
+  );
+
+  // Completed Project Editing Modal State
+  const [editingProject, setEditingProject] = useState<Partial<CompletedProject> | null>(null);
+
   // About Us Key Point input state
   const [newPointInput, setNewPointInput] = useState('');
 
@@ -106,6 +120,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setWhatsAppInput(settings.whatsAppNumber);
     if (settings.services && settings.services.length > 0) {
       setServicesList(settings.services);
+    }
+    if (settings.completedProjects && settings.completedProjects.length > 0) {
+      setCompletedProjectsList(settings.completedProjects);
     }
   }, [settings]);
 
@@ -305,6 +322,87 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       alert('Reset to default 8 landscaping services.');
     } catch (err: any) {
       alert(`Failed to reset services: ${err?.message}`);
+    }
+  };
+
+  // Completed Projects Management Handlers
+  const handleSaveCompletedProjectsList = async (newList: CompletedProject[]) => {
+    setCompletedProjectsList(newList);
+    const updatedSettings: WebsiteSettings = {
+      ...settingsForm,
+      completedProjects: newList,
+    };
+    setSettingsForm(updatedSettings);
+    try {
+      await onUpdateSettings(updatedSettings);
+    } catch (err: any) {
+      alert(`Failed to update completed projects: ${err?.message || 'Check permissions.'}`);
+    }
+  };
+
+  const handleMoveProject = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= completedProjectsList.length) return;
+    const updated = [...completedProjectsList];
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+    void handleSaveCompletedProjectsList(updated);
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    if (window.confirm('Are you sure you want to remove this completed project slide?')) {
+      const updated = completedProjectsList.filter((p) => p.id !== projectId);
+      void handleSaveCompletedProjectsList(updated);
+    }
+  };
+
+  const handleResetProjectsToDefault = () => {
+    if (window.confirm('Reset completed projects carousel to the default portfolio showcase?')) {
+      void handleSaveCompletedProjectsList(INITIAL_COMPLETED_PROJECTS);
+    }
+  };
+
+  const handleSaveProjectModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProject || !editingProject.title || !editingProject.imageUrl) {
+      alert('Please provide a project title and upload or specify an image.');
+      return;
+    }
+
+    const projectToSave: CompletedProject = {
+      id:
+        editingProject.id ||
+        `proj-${crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : Date.now()}`,
+      title: editingProject.title.trim(),
+      category: editingProject.category?.trim() || 'Villa Landscaping',
+      location: editingProject.location?.trim() || 'Rajahmundry, AP',
+      imageUrl: editingProject.imageUrl,
+      description: editingProject.description?.trim() || '',
+    };
+
+    let updated: CompletedProject[];
+    if (editingProject.id) {
+      updated = completedProjectsList.map((p) =>
+        p.id === editingProject.id ? projectToSave : p
+      );
+    } else {
+      updated = [...completedProjectsList, projectToSave];
+    }
+
+    await handleSaveCompletedProjectsList(updated);
+    setEditingProject(null);
+    alert(`Project "${projectToSave.title}" saved successfully!`);
+  };
+
+  const handleReplaceProjectImage = async (index: number, file: File) => {
+    try {
+      const url = await handleUploadImageFile(file);
+      const updated = [...completedProjectsList];
+      updated[index] = { ...updated[index], imageUrl: url };
+      await handleSaveCompletedProjectsList(updated);
+    } catch (err: any) {
+      console.error('Failed to replace project image:', err);
     }
   };
 
@@ -1114,6 +1212,224 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Completed Projects Carousel Portfolio Manager */}
+                  <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#1B3022]/10 shadow-sm space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1B3022]/10">
+                      <div>
+                        <div className="inline-flex items-center space-x-1.5 text-xs font-bold text-[#2D4F36] uppercase tracking-wider mb-1">
+                          <Sparkles className="w-4 h-4 text-[#2D4F36]" />
+                          <span>Horizontal Carousel & Slider</span>
+                        </div>
+                        <h4 className="text-xl font-serif font-bold text-[#1B3022]">
+                          Completed Projects Portfolio
+                        </h4>
+                        <p className="text-xs text-[#1B3022]/65">
+                          Upload, replace, and reorder completed landscaping projects displayed in the horizontal swipe carousel.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleResetProjectsToDefault}
+                          className="px-3.5 py-2 border border-[#1B3022]/20 hover:bg-[#1B3022]/5 text-[#1B3022] text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                          title="Reset to default portfolio slides"
+                        >
+                          Reset Defaults
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditingProject({
+                              title: '',
+                              category: 'Villa Landscaping',
+                              location: 'Rajahmundry, AP',
+                              imageUrl: '',
+                              description: '',
+                            })
+                          }
+                          className="px-4 py-2 bg-[#2D4F36] hover:bg-[#1B3022] text-white text-xs font-bold rounded-xl flex items-center space-x-1.5 transition-colors cursor-pointer shadow-sm"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>Add New Project</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Section Titles Form */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#F9F8F3] p-4 rounded-2xl border border-[#1B3022]/10">
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                          Carousel Header Title
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Our Completed Projects"
+                          value={settingsForm.completedProjectsTitle || ''}
+                          onChange={(e) => {
+                            const updated = {
+                              ...settingsForm,
+                              completedProjectsTitle: e.target.value,
+                            };
+                            setSettingsForm(updated);
+                            void onUpdateSettings(updated);
+                          }}
+                          className="w-full bg-white p-2.5 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                          Carousel Subtitle / Pill Badge
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Real Transformations & Site Portfolios"
+                          value={settingsForm.completedProjectsSubtitle || ''}
+                          onChange={(e) => {
+                            const updated = {
+                              ...settingsForm,
+                              completedProjectsSubtitle: e.target.value,
+                            };
+                            setSettingsForm(updated);
+                            void onUpdateSettings(updated);
+                          }}
+                          className="w-full bg-white p-2.5 rounded-xl border border-[#1B3022]/15 text-xs text-[#1B3022] focus:outline-none focus:border-[#2D4F36]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Projects Cards List with Reordering */}
+                    {completedProjectsList.length === 0 ? (
+                      <div className="text-center py-12 bg-[#F9F8F3] rounded-2xl border border-dashed border-[#1B3022]/20 p-6">
+                        <ImageIcon className="w-10 h-10 text-[#2D4F36]/40 mx-auto mb-2" />
+                        <p className="text-xs font-bold text-[#1B3022]">No completed projects in carousel</p>
+                        <p className="text-[11px] text-[#1B3022]/60 mt-1 mb-4">
+                          Click "Add New Project" or "Reset Defaults" to showcase your transformation portfolio.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleResetProjectsToDefault}
+                          className="px-4 py-2 bg-[#2D4F36] text-white text-xs font-bold rounded-full cursor-pointer"
+                        >
+                          Load Standard Showcase
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {completedProjectsList.map((project, idx) => (
+                          <div
+                            key={project.id || idx}
+                            className="bg-[#F9F8F3] rounded-2xl border border-[#1B3022]/15 overflow-hidden shadow-sm flex flex-col justify-between hover:border-[#2D4F36]/40 transition-all group"
+                          >
+                            <div>
+                              {/* Thumbnail & Order Badge */}
+                              <div className="relative aspect-[16/10] bg-[#1B3022] overflow-hidden">
+                                <img
+                                  src={project.imageUrl}
+                                  alt={project.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                                  <span className="bg-[#2D4F36] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow">
+                                    Slide #{idx + 1}
+                                  </span>
+                                  <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-semibold px-2.5 py-0.5 rounded-full">
+                                    {project.category}
+                                  </span>
+                                </div>
+
+                                {/* Reorder Controls Overlay */}
+                                <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/50 backdrop-blur-md p-1 rounded-xl">
+                                  <button
+                                    type="button"
+                                    disabled={idx === 0}
+                                    onClick={() => handleMoveProject(idx, 'up')}
+                                    className={`p-1.5 rounded-lg text-white transition-colors cursor-pointer ${
+                                      idx === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20'
+                                    }`}
+                                    title="Move Slide Earlier"
+                                  >
+                                    <ArrowUp className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={idx === completedProjectsList.length - 1}
+                                    onClick={() => handleMoveProject(idx, 'down')}
+                                    className={`p-1.5 rounded-lg text-white transition-colors cursor-pointer ${
+                                      idx === completedProjectsList.length - 1
+                                        ? 'opacity-30 cursor-not-allowed'
+                                        : 'hover:bg-white/20'
+                                    }`}
+                                    title="Move Slide Later"
+                                  >
+                                    <ArrowDown className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+
+                                {project.location && (
+                                  <div className="absolute bottom-2.5 left-2.5 flex items-center space-x-1 text-white text-[10px] font-medium bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full">
+                                    <MapPin className="w-3 h-3 text-[#A7F3D0]" />
+                                    <span>{project.location}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Details */}
+                              <div className="p-4 space-y-1.5">
+                                <h5 className="font-serif font-bold text-sm text-[#1B3022] line-clamp-1">
+                                  {project.title}
+                                </h5>
+                                {project.description && (
+                                  <p className="text-[11px] text-[#1B3022]/70 line-clamp-2 leading-relaxed">
+                                    {project.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Card Actions */}
+                            <div className="p-3.5 pt-0 border-t border-[#1B3022]/10 mt-2 flex items-center justify-between gap-2">
+                              <label className="px-2.5 py-1.5 bg-white hover:bg-[#2D4F36] hover:text-white border border-[#1B3022]/15 text-[#1B3022] text-[11px] font-bold rounded-lg cursor-pointer transition-colors flex items-center space-x-1">
+                                <Upload className="w-3 h-3" />
+                                <span>Replace Photo</span>
+                                <input
+                                  type="file"
+                                  accept="image/png, image/jpeg, image/webp"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      void handleReplaceProjectImage(idx, file);
+                                    }
+                                  }}
+                                />
+                              </label>
+
+                              <div className="flex items-center space-x-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingProject(project)}
+                                  className="p-1.5 hover:bg-white text-[#1B3022] rounded-lg transition-colors cursor-pointer"
+                                  title="Edit Project Details"
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteProject(project.id)}
+                                  className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors cursor-pointer"
+                                  title="Delete Project Slide"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -2229,6 +2545,188 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   className="px-6 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white font-bold text-xs uppercase tracking-wider rounded-full shadow-md cursor-pointer transition-colors"
                 >
                   Save Service
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Completed Project Editing Modal */}
+      {editingProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div
+            className="bg-[#F9F8F3] w-full max-w-xl rounded-3xl shadow-2xl border border-[#1B3022]/15 p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center pb-4 border-b border-[#1B3022]/10">
+              <div>
+                <span className="text-[10px] uppercase tracking-widest font-bold text-[#2D4F36]">
+                  Carousel Slide Manager
+                </span>
+                <h3 className="text-xl font-serif font-bold text-[#1B3022]">
+                  {editingProject.id ? 'Edit Completed Project' : 'Add New Completed Project'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingProject(null)}
+                className="p-2 hover:bg-[#1B3022]/10 rounded-full text-[#1B3022] cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProjectModal} className="mt-6 space-y-4 text-left text-xs">
+              {/* Project Title */}
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                  Project Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Luxury Villa Japanese Zen Garden"
+                  value={editingProject.title || ''}
+                  onChange={(e) =>
+                    setEditingProject({ ...editingProject, title: e.target.value })
+                  }
+                  className="w-full p-2.5 bg-white border border-[#1B3022]/20 rounded-xl text-xs font-medium"
+                />
+              </div>
+
+              {/* Category & Location */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                    Category Tag *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Villa Landscaping"
+                    value={editingProject.category || ''}
+                    onChange={(e) =>
+                      setEditingProject({ ...editingProject, category: e.target.value })
+                    }
+                    className="w-full p-2.5 bg-white border border-[#1B3022]/20 rounded-xl text-xs"
+                  />
+                  {/* Category Quick Presets */}
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {[
+                      'Villa Landscaping',
+                      'Vertical Gardens',
+                      'Terrace Gardens',
+                      'Resort & Estate',
+                      'Farm Landscaping',
+                      'Indoor Biophilia',
+                    ].map((cat) => (
+                      <button
+                        type="button"
+                        key={cat}
+                        onClick={() =>
+                          setEditingProject({ ...editingProject, category: cat })
+                        }
+                        className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[#E3F2E6] text-[#2D4F36] hover:bg-[#2D4F36] hover:text-white transition-colors cursor-pointer"
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                    Location (City / State)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Rajahmundry, AP"
+                    value={editingProject.location || ''}
+                    onChange={(e) =>
+                      setEditingProject({ ...editingProject, location: e.target.value })
+                    }
+                    className="w-full p-2.5 bg-white border border-[#1B3022]/20 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                  Project Summary / Highlights
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Describe scope, plant varieties, irrigation systems, or site features..."
+                  value={editingProject.description || ''}
+                  onChange={(e) =>
+                    setEditingProject({ ...editingProject, description: e.target.value })
+                  }
+                  className="w-full p-2.5 bg-white border border-[#1B3022]/20 rounded-xl text-xs"
+                ></textarea>
+              </div>
+
+              {/* Image Upload / URL */}
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[#1B3022] mb-1">
+                  Project Showcase Image *
+                </label>
+                <div className="space-y-2 bg-[#F1EFE7] p-3 rounded-2xl border border-[#1B3022]/15">
+                  {editingProject.imageUrl && (
+                    <div className="relative aspect-[16/9] w-full bg-[#1B3022] rounded-xl overflow-hidden shadow-sm">
+                      <img
+                        src={editingProject.imageUrl}
+                        alt="Project Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <label className="px-4 py-2 bg-[#2D4F36] hover:bg-[#1B3022] text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 cursor-pointer shadow transition-colors shrink-0">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>{isUploadingImage ? 'Uploading...' : 'Upload Image'}</span>
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = await handleUploadImageFile(file);
+                            setEditingProject({ ...editingProject, imageUrl: url });
+                          }
+                        }}
+                      />
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="Or enter image URL (https://...)"
+                      value={editingProject.imageUrl || ''}
+                      onChange={(e) =>
+                        setEditingProject({ ...editingProject, imageUrl: e.target.value })
+                      }
+                      className="flex-1 p-2 bg-white border border-[#1B3022]/20 rounded-xl text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Form Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t border-[#1B3022]/10">
+                <button
+                  type="button"
+                  onClick={() => setEditingProject(null)}
+                  className="px-5 py-2.5 border border-[#1B3022]/20 rounded-full font-bold text-xs hover:bg-[#1B3022]/5 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-[#2D4F36] hover:bg-[#1B3022] text-white font-bold text-xs uppercase tracking-wider rounded-full shadow-md cursor-pointer transition-colors"
+                >
+                  Save Project Slide
                 </button>
               </div>
             </form>

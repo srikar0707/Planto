@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LandscapingService, WebsiteSettings } from '../types';
 import { INITIAL_SERVICES } from '../data/initialData';
+import { CompletedProjectsCarousel } from './CompletedProjectsCarousel';
 import {
   Home,
   Building,
@@ -176,6 +177,9 @@ Please schedule a consultation callback.`;
             </div>
           ))}
         </div>
+
+        {/* Completed Projects Side-Swipe Carousel Panel */}
+        <CompletedProjectsCarousel settings={settings} />
       </div>
 
       {/* Service Enquiry Modal */}
