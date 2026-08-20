@@ -146,9 +146,9 @@ Please share estimated timelines and consultation details for my space.`;
   const currentProject = projects[currentIndex] || projects[0];
 
   return (
-    <div className="mt-20 pt-16 border-t border-[#1B3022]/10" id="completed-projects">
+    <div className="mt-16 pt-12 border-t border-[#1B3022]/10" id="completed-projects">
       {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-6">
         <div>
           <div className="inline-flex items-center space-x-2 bg-[#2D4F36]/10 text-[#2D4F36] px-3.5 py-1.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider mb-3">
             <Sparkles className="w-3.5 h-3.5 text-[#2D4F36]" />
@@ -292,11 +292,11 @@ Please share estimated timelines and consultation details for my space.`;
                     </div>
 
                     {/* Action & Inquiry Buttons */}
-                    <div className="pt-6 border-t border-[#1B3022]/10 flex flex-col sm:flex-row gap-3">
+                    <div className="pt-4 border-t border-[#1B3022]/10 flex flex-col sm:flex-row gap-2.5">
                       <button
                         type="button"
                         onClick={() => handleWhatsAppEnquiry(project)}
-                        className="flex-1 px-5 py-3 bg-[#25D366] hover:bg-[#1ebd59] text-white rounded-full text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-2 shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
+                        className="flex-1 px-4 py-2.5 bg-[#25D366] hover:bg-[#1ebd59] text-white rounded-full text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-2 shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
                       >
                         <MessageCircle className="w-4 h-4 fill-current" />
                         <span>Enquire Similar Project</span>
@@ -305,7 +305,7 @@ Please share estimated timelines and consultation details for my space.`;
                       <button
                         type="button"
                         onClick={() => setLightboxProject(project)}
-                        className="px-5 py-3 bg-white hover:bg-[#F1EFE7] text-[#1B3022] border border-[#1B3022]/20 rounded-full text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5 active:scale-95 cursor-pointer"
+                        className="px-4 py-2.5 bg-white hover:bg-[#F1EFE7] text-[#1B3022] border border-[#1B3022]/20 rounded-full text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-1.5 active:scale-95 cursor-pointer"
                       >
                         <span>View Photo</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -319,8 +319,8 @@ Please share estimated timelines and consultation details for my space.`;
         </div>
       </div>
 
-      {/* Pagination Dots & Navigation Indicators */}
-      <div className="flex justify-center items-center space-x-2 mt-8">
+      {/* Pagination Dots & Navigation Indicators (Compact Tighter Gap) */}
+      <div className="flex justify-center items-center space-x-2 mt-3.5">
         {projects.map((_, idx) => (
           <button
             key={idx}
@@ -328,8 +328,8 @@ Please share estimated timelines and consultation details for my space.`;
             aria-label={`Go to slide ${idx + 1}`}
             className={`transition-all duration-300 rounded-full cursor-pointer ${
               idx === currentIndex
-                ? 'w-8 h-2.5 bg-[#2D4F36]'
-                : 'w-2.5 h-2.5 bg-[#1B3022]/20 hover:bg-[#1B3022]/40'
+                ? 'w-6 h-2 bg-[#2D4F36]'
+                : 'w-2 h-2 bg-[#1B3022]/25 hover:bg-[#1B3022]/50'
             }`}
           />
         ))}
