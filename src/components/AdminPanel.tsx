@@ -868,39 +868,71 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     {categories.map((cat) => (
                       <div
                         key={cat.id}
-                        className="bg-white p-4 rounded-2xl border border-[#1B3022]/10 shadow-sm flex items-center justify-between"
+                        className="bg-white p-4 rounded-2xl border border-[#1B3022]/10 shadow-sm flex flex-col justify-between space-y-3 hover:border-[#2D4F36]/30 transition-all"
                       >
                         <div className="flex items-center space-x-3 overflow-hidden">
-                          <img
-                            src={cat.image || 'https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=150&q=80'}
-                            alt={cat.name}
-                            className="w-12 h-12 rounded-xl object-cover border border-[#1B3022]/10 shrink-0"
-                          />
-                          <div className="overflow-hidden">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#2D4F36] block">
+                          <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-[#2D4F36]/20 shrink-0 shadow-sm">
+                            <img
+                              src={
+                                cat.image ||
+                                'https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=150&q=80'
+                              }
+                              alt={cat.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src =
+                                  'https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=150&q=80';
+                              }}
+                            />
+                          </div>
+                          <div className="overflow-hidden flex-1">
+                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#2D4F36] block">
                               {cat.group}
                             </span>
                             <h4 className="font-serif font-bold text-sm text-[#1B3022] truncate">
                               {cat.name}
                             </h4>
                             <p className="text-[10px] text-[#1B3022]/60 truncate max-w-xs">
-                              {cat.description}
+                              {cat.description || 'No description provided'}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-1 shrink-0 ml-2">
-                          <button
-                            onClick={() => setEditingCategory(cat)}
-                            className="p-1.5 text-[#2D4F36] hover:bg-[#2D4F36]/10 rounded-lg cursor-pointer"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => onDeleteCategory(cat.id)}
-                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+
+                        <div className="pt-2 border-t border-[#1B3022]/10 flex items-center justify-between">
+                          <label className="text-[11px] font-bold text-[#2D4F36] hover:underline flex items-center gap-1 cursor-pointer">
+                            <Upload className="w-3 h-3" />
+                            <span>Change Photo</span>
+                            <input
+                              type="file"
+                              accept="image/png, image/jpeg, image/webp"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const url = await handleUploadImageFile(file);
+                                  const updated = { ...cat, image: url };
+                                  await onSaveCategory(updated);
+                                }
+                              }}
+                            />
+                          </label>
+
+                          <div className="flex items-center space-x-1 shrink-0">
+                            <button
+                              onClick={() => setEditingCategory(cat)}
+                              className="p-1.5 text-[#2D4F36] hover:bg-[#2D4F36]/10 rounded-lg cursor-pointer"
+                              title="Edit Category"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => onDeleteCategory(cat.id)}
+                              className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
+                              title="Delete Category"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -2243,31 +2275,61 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold mb-1">Category Image</label>
-                <div className="space-y-2 bg-[#F1EFE7] p-3 rounded-xl border border-[#1B3022]/15">
+                <label className="block font-bold mb-1 text-[#1B3022]">
+                  Category Circular Showcase Photo *
+                </label>
+                <div className="space-y-3 bg-[#F1EFE7] p-3 rounded-2xl border border-[#1B3022]/15">
                   {editingCategory.image && (
-                    <img
-                      src={editingCategory.image}
-                      alt="Preview"
-                      className="w-16 h-16 rounded-lg object-cover border"
-                    />
+                    <div className="flex items-center space-x-3 bg-white p-2.5 rounded-xl border border-[#1B3022]/10">
+                      <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#2D4F36] shrink-0 shadow-sm">
+                        <img
+                          src={editingCategory.image}
+                          alt="Category Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              'https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=150&q=80';
+                          }}
+                        />
+                      </div>
+                      <div className="text-[11px] text-[#1B3022]/70">
+                        <span className="font-bold text-[#2D4F36] block">
+                          Current Circular Avatar
+                        </span>
+                        <span className="text-[10px] truncate block max-w-[200px]">
+                          {editingCategory.image}
+                        </span>
+                      </div>
+                    </div>
                   )}
-                  <label className="flex items-center justify-center space-x-2 px-3 py-2 bg-[#2D4F36] text-white rounded-xl cursor-pointer text-xs font-bold">
-                    <Upload className="w-4 h-4" />
-                    <span>Upload Image File</span>
+
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center justify-center space-x-1.5 px-3 py-2 bg-[#2D4F36] hover:bg-[#1B3022] text-white rounded-xl cursor-pointer text-xs font-bold shrink-0 transition-colors shadow-sm">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>{isUploadingImage ? 'Uploading...' : 'Upload Image'}</span>
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const url = await handleUploadImageFile(file);
+                            setEditingCategory({ ...editingCategory, image: url });
+                          }
+                        }}
+                      />
+                    </label>
                     <input
-                      type="file"
-                      accept="image/png, image/jpeg, image/webp"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const url = await handleUploadImageFile(file);
-                          setEditingCategory({ ...editingCategory, image: url });
-                        }
-                      }}
+                      type="url"
+                      placeholder="Or enter image URL (https://...)"
+                      value={editingCategory.image || ''}
+                      onChange={(e) =>
+                        setEditingCategory({ ...editingCategory, image: e.target.value })
+                      }
+                      className="flex-1 p-2 bg-white border border-[#1B3022]/20 rounded-xl text-xs"
                     />
-                  </label>
+                  </div>
                 </div>
               </div>
 

@@ -1,12 +1,12 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { ProductCatalog } from '../components/ProductCatalog';
 import { Product, Category } from '../types';
 
 const mockCategories: Category[] = [
-  { id: 'cat-indoor', name: 'Indoor Plants', group: 'Plants', description: 'Indoor plants', image: '' },
-  { id: 'cat-flower', name: 'Flower Plants', group: 'Plants', description: 'Flowering plants', image: '' },
-  { id: 'cat-pots', name: 'Pots', group: 'Other', description: 'Artisan pots', image: '' },
+  { id: 'cat-indoor', name: 'Indoor Plants', group: 'Plants', description: 'Shade loving indoor plants', image: 'https://example.com/indoor.jpg' },
+  { id: 'cat-flower', name: 'Flower Plants', group: 'Plants', description: 'Flowering perennial plants', image: 'https://example.com/flower.jpg' },
+  { id: 'cat-pots', name: 'Pots', group: 'Other', description: 'Artisan terracotta pots', image: 'https://example.com/pots.jpg' },
 ];
 
 const mockProducts: Product[] = [
@@ -79,7 +79,7 @@ const mockProducts: Product[] = [
 ];
 
 describe('ProductCatalog Component', () => {
-  it('renders all products when category is All and search is empty', () => {
+  it('renders circular categories and all products when category is All', () => {
     render(
       <ProductCatalog
         products={mockProducts}
@@ -93,12 +93,41 @@ describe('ProductCatalog Component', () => {
       />
     );
 
+    // Verify categories rendered
+    expect(screen.getByText('All Collection')).toBeInTheDocument();
+    expect(screen.getAllByText('Indoor Plants').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Flower Plants').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Pots').length).toBeGreaterThanOrEqual(1);
+
+    // Verify products rendered
     expect(screen.getByText('Monstera Deliciosa')).toBeInTheDocument();
     expect(screen.getByText('Peace Lily')).toBeInTheDocument();
     expect(screen.getByText('Terracotta Handcrafted Pot')).toBeInTheDocument();
   });
 
-  it('filters products correctly when category is selected', () => {
+  it('triggers onSelectCategory when clicking a circular category card', () => {
+    const selectCategorySpy = vi.fn();
+
+    render(
+      <ProductCatalog
+        products={mockProducts}
+        categories={mockCategories}
+        selectedCategory="All"
+        onSelectCategory={selectCategorySpy}
+        onAddToCart={vi.fn()}
+        onViewDetails={vi.fn()}
+        searchQuery=""
+        setSearchQuery={vi.fn()}
+      />
+    );
+
+    const potsCategoryElements = screen.getAllByText('Pots');
+    fireEvent.click(potsCategoryElements[0]);
+
+    expect(selectCategorySpy).toHaveBeenCalledWith('Pots');
+  });
+
+  it('filters products correctly and renders category banner when category is selected', () => {
     render(
       <ProductCatalog
         products={mockProducts}
@@ -115,6 +144,7 @@ describe('ProductCatalog Component', () => {
     expect(screen.getByText('Terracotta Handcrafted Pot')).toBeInTheDocument();
     expect(screen.queryByText('Monstera Deliciosa')).not.toBeInTheDocument();
     expect(screen.queryByText('Peace Lily')).not.toBeInTheDocument();
+    expect(screen.getByText('Back to All Categories')).toBeInTheDocument();
   });
 
   it('filters products correctly by search query', () => {
