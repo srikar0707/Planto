@@ -66,7 +66,15 @@ export const store = {
   async uploadProductImage(file: File) {
     const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     const path = `products/${crypto.randomUUID()}.${extension}`;
-    const { error } = await client().storage.from('product-images').upload(path, file, { upsert: false, contentType: file.type, cacheControl: '31536000' });
+    const { error } = await client().storage.from('product-images').upload(path, file, {
+      upsert: true,
+      contentType: file.type,
+      cacheControl: '31536000',
+    });
+    if (error) {
+      console.error('Supabase Storage Upload Error:', error);
+      throw error;
+    }
     return `/storage/product-images/${path}`;
   },
 };

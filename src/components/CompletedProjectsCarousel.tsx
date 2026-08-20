@@ -230,6 +230,10 @@ Please share estimated timelines and consultation details for my space.`;
                       alt={project.title}
                       className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-700 pointer-events-none"
                       loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          'https://images.unsplash.com/photo-1558904541-efa8c196b27d?auto=format&fit=crop&w=1200&q=80';
+                      }}
                     />
 
                     {/* Image overlay with category & zoom trigger */}

@@ -1330,6 +1330,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                   src={project.imageUrl}
                                   alt={project.title}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                  onError={(e) => {
+                                    e.currentTarget.src =
+                                      'https://images.unsplash.com/photo-1558904541-efa8c196b27d?auto=format&fit=crop&w=800&q=80';
+                                  }}
                                 />
                                 <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
                                   <span className="bg-[#2D4F36] text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow">
@@ -2679,6 +2683,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         src={editingProject.imageUrl}
                         alt="Project Preview"
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            'https://images.unsplash.com/photo-1558904541-efa8c196b27d?auto=format&fit=crop&w=800&q=80';
+                        }}
                       />
                     </div>
                   )}
