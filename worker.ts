@@ -1,5 +1,12 @@
+interface Env {
+  VITE_SUPABASE_URL?: string;
+  ASSETS: {
+    fetch: (request: Request) => Promise<Response>;
+  };
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
     // Proxy Supabase storage requests seamlessly through custom domain
@@ -31,7 +38,7 @@ export default {
       }
     }
 
-    // Default static assets handler for single-page React app
+    // Delegate static assets and SPA routes to Cloudflare Assets
     return env.ASSETS.fetch(request);
   },
 };
