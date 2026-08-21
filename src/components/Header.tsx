@@ -66,14 +66,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navLinks = [
     { name: 'Home', href: '#home' },
-    { name: 'Plants', href: '#products', category: 'Plants' },
-    { name: 'Accessories', href: '#products', category: 'Accessories' },
-    { name: 'Pots', href: '#products', category: 'Pots' },
-    { name: 'Pebbles', href: '#products', category: 'Pebbles' },
-    { name: 'Seeds', href: '#products', category: 'Seeds' },
-    { name: 'Soil & Manure', href: '#products', category: 'Soil & Manure' },
-    { name: 'Landscaping', href: '#landscaping' },
     { name: 'About Us', href: '#about' },
+    { name: 'Landscaping', href: '#landscaping' },
     { name: 'Contact', href: '#contact' },
   ];
 
@@ -149,12 +143,12 @@ export const Header: React.FC<HeaderProps> = ({
           </a>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center space-x-2 xl:space-x-4 text-[11px] uppercase tracking-wider font-extrabold text-[#1B3022]">
+          <div className="hidden lg:flex items-center space-x-3 xl:space-x-6 text-xs uppercase tracking-wider font-extrabold text-[#1B3022]">
             {navLinks.map((link) => (
               <button
                 key={link.name}
                 onClick={() => handleNavClick(link)}
-                className="hover:text-[#2D4F36] hover:bg-[#2D4F36]/10 px-2.5 py-1.5 rounded-md transition-all cursor-pointer whitespace-nowrap"
+                className="hover:text-[#2D4F36] hover:bg-[#2D4F36]/10 px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap"
               >
                 {link.name}
               </button>
