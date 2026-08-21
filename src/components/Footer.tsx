@@ -77,7 +77,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, onSelectCategory }) =>
             </div>
 
             <p className="text-xs text-white/60 font-medium tracking-wide">
-              Developed by K.Srikar and V.Manikanta
+              Developed by Srikar K.N.S.M and Vasamsetti Manikanta
             </p>
           </div>
 
