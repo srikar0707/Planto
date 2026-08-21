@@ -25,12 +25,12 @@ export const Logo: React.FC<LogoProps> = ({
           alt="PlantO Nursery Gardens Logo"
           className={`object-contain mix-blend-multiply bg-transparent transition-opacity duration-200 ${
             size === 'sm'
-              ? 'h-6 sm:h-7'
+              ? 'h-8 sm:h-9'
               : size === 'md'
-              ? 'h-8 sm:h-10'
+              ? 'h-11 sm:h-13'
               : size === 'lg'
-              ? 'h-10 sm:h-12'
-              : 'h-12 sm:h-14'
+              ? 'h-13 sm:h-16 md:h-18'
+              : 'h-16 sm:h-20 md:h-24'
           }`}
           style={{ mixBlendMode: 'multiply' }}
         />
@@ -40,11 +40,11 @@ export const Logo: React.FC<LogoProps> = ({
 
   return (
     <div className={`inline-flex flex-col ${alignmentClass} justify-center select-none bg-transparent ${className}`}>
-      <span className="font-serif font-extrabold tracking-tight text-[#1B3022] text-lg sm:text-xl lg:text-2xl leading-none">
+      <span className="font-serif font-extrabold tracking-tight text-[#1B3022] text-xl sm:text-2xl md:text-3xl leading-none">
         Plant<span className="text-[#2D4F36]">O</span>
       </span>
       {showSubtitle && (
-        <span className="text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.22em] text-[#2D4F36]/80 mt-0.5">
+        <span className="text-[9px] sm:text-[10px] md:text-xs font-semibold uppercase tracking-[0.22em] text-[#2D4F36]/80 mt-0.5">
           Nursery Gardens
         </span>
       )}

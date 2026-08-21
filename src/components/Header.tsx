@@ -106,12 +106,12 @@ export const Header: React.FC<HeaderProps> = ({
       }`}
     >
       {/* Top Compact Banner */}
-      <div className="bg-[#1B3022] text-[#F9F8F3] text-[10px] sm:text-xs py-1 px-4 text-center flex items-center justify-between font-medium">
-        <div className="hidden md:flex items-center space-x-2 text-[10px] sm:text-[11px] opacity-80">
-          <Sparkles className="w-3 h-3 text-[#A3B18A]" />
+      <div className="bg-[#1B3022] text-[#F9F8F3] text-[11px] sm:text-xs py-1.5 px-4 text-center flex items-center justify-between font-medium">
+        <div className="hidden md:flex items-center space-x-2 text-[11px] opacity-80">
+          <Sparkles className="w-3.5 h-3.5 text-[#A3B18A]" />
           <span>Organic Plants & Landscaping Solutions across India</span>
         </div>
-        <div className="mx-auto md:mx-0 text-[10px] sm:text-[11px] tracking-wide">
+        <div className="mx-auto md:mx-0 text-[11px] tracking-wide">
           <span>WhatsApp Enquiries & Orders: </span>
           <a
             href={`https://wa.me/${settings.whatsAppNumber}`}
@@ -122,21 +122,21 @@ export const Header: React.FC<HeaderProps> = ({
             {settings.contactPhone}
           </a>
         </div>
-        <div className="hidden md:flex items-center space-x-4 text-[10px] sm:text-[11px]">
+        <div className="hidden md:flex items-center space-x-4 text-[11px]">
           <span>Mon-Sun 8AM - 8PM</span>
         </div>
       </div>
 
-      {/* Main Sleek Navbar */}
+      {/* Main Navbar */}
       <nav
-        className={`w-full border-b border-[#1B3022]/10 backdrop-blur-md transition-colors duration-200 py-1.5 sm:py-2 ${
+        className={`w-full border-b border-[#1B3022]/10 backdrop-blur-md transition-colors duration-200 py-2.5 sm:py-3 ${
           isScrolled
             ? 'bg-[#F9F8F3]/95 shadow-sm'
             : 'bg-[#F9F8F3]/90'
         }`}
       >
         <div className="w-full max-w-[98%] mx-auto px-2 sm:px-4 lg:px-8 flex items-center justify-between gap-3 sm:gap-4">
-          {/* Logo - Sleek & Compact */}
+          {/* Logo - Prominent & Noticeable */}
           <a
             href="#home"
             onClick={(e) => {
@@ -145,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             className="flex items-center group focus:outline-none shrink-0 pr-2 transition-transform duration-200 hover:scale-105"
           >
-            <Logo size="md" customLogoUrl={settings.logoUrl} align="left" />
+            <Logo size="lg" customLogoUrl={settings.logoUrl} align="left" />
           </a>
 
           {/* Desktop Nav Links */}
@@ -154,7 +154,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 key={link.name}
                 onClick={() => handleNavClick(link)}
-                className="hover:text-[#2D4F36] hover:bg-[#2D4F36]/10 px-2 py-1 rounded-md transition-all cursor-pointer whitespace-nowrap"
+                className="hover:text-[#2D4F36] hover:bg-[#2D4F36]/10 px-2.5 py-1.5 rounded-md transition-all cursor-pointer whitespace-nowrap"
               >
                 {link.name}
               </button>
